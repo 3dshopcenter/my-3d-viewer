@@ -71,20 +71,16 @@
     #action-hint.measure { background: rgba(192,57,43,0.85); }
     #action-hint.move    { background: rgba(230,126,34,0.85); }
 
+    #snap-cursor { display: none !important; }
+    
     #model-list-panel {
       position: absolute;
-      left: 16px;
-      top: 90px;
+      left: 16px; top: 90px;
       background: rgba(0,0,0,0.75);
-      border-radius: 8px;
-      padding: 10px;
-      min-width: 200px;
-      max-width: 260px;
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 50vh;
-      overflow-y: auto;
+      border-radius: 8px; padding: 10px;
+      min-width: 200px; max-width: 260px;
+      display: none; flex-direction: column; gap: 6px;
+      max-height: 40vh; overflow-y: auto;
     }
     #model-list-panel.visible { display: flex; }
     #model-list-title { font-size: 11px; color: #aaa; margin-bottom: 2px; }
@@ -104,54 +100,60 @@
     #model-list-actions { display: flex; gap: 6px; margin-top: 4px; }
     #model-list-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
 
-    /* Экспорт */
+    #measure-list-panel {
+      position: absolute;
+      left: 16px; bottom: 20px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 8px; padding: 10px;
+      min-width: 220px; max-width: 280px;
+      display: none; flex-direction: column; gap: 6px;
+      max-height: 40vh; overflow-y: auto;
+    }
+    #measure-list-panel.visible { display: flex; }
+    #measure-list-title { font-size: 11px; color: #aaa; margin-bottom: 2px; }
+    .measure-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px; border-radius: 6px;
+      background: rgba(231,76,60,0.15);
+      font-size: 12px;
+      border: 1px solid rgba(231,76,60,0.3);
+    }
+    .measure-item-label { flex: 1; color: #e74c3c; }
+    .measure-item-val { color: white; font-size: 11px; }
+    .measure-item-del { background: none; border: none; color: #888; cursor: pointer; font-size: 13px; padding: 0 2px; }
+    .measure-item-del:hover { color: #e74c3c; }
+    #measure-list-actions { display: flex; gap: 6px; margin-top: 4px; }
+    #measure-list-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
+
     #export-panel {
       position: absolute;
-      right: 20px;
-      bottom: 120px;
+      right: 20px; bottom: 120px;
       background: rgba(0,0,0,0.75);
-      border-radius: 8px;
-      padding: 10px 14px;
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 160px;
+      border-radius: 8px; padding: 10px 14px;
+      display: none; flex-direction: column; gap: 8px; min-width: 160px;
     }
     #export-panel.visible { display: flex; }
     #export-title { font-size: 11px; color: #aaa; }
     #export-name {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 5px;
-      color: white;
-      font-size: 12px;
-      padding: 5px 8px;
-      width: 100%;
+      border-radius: 5px; color: white; font-size: 12px;
+      padding: 5px 8px; width: 100%;
     }
     .export-btn {
-      background: #0f3460;
-      color: white;
-      border: none;
-      padding: 7px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      text-align: left;
+      background: #0f3460; color: white; border: none;
+      padding: 7px 10px; border-radius: 6px;
+      cursor: pointer; font-size: 12px; text-align: left;
     }
     .export-btn:hover { background: #533483; }
     .export-btn span { color: #7a9cc0; font-size: 11px; margin-left: 4px; }
 
     #move-panel {
       position: absolute;
-      left: 16px;
-      bottom: 100px;
+      left: 16px; bottom: 20px;
       background: rgba(0,0,0,0.75);
-      border-radius: 8px;
-      padding: 10px 14px;
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 180px;
+      border-radius: 8px; padding: 10px 14px;
+      display: none; flex-direction: column; gap: 8px; min-width: 180px;
     }
     #move-panel.visible { display: flex; }
     #move-panel-title { font-size: 11px; color: #aaa; }
@@ -162,15 +164,10 @@
 
     #clip-panel {
       position: absolute;
-      left: 16px;
-      bottom: 20px;
+      left: 16px; bottom: 20px;
       background: rgba(0,0,0,0.7);
-      border-radius: 8px;
-      padding: 12px 16px;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      min-width: 220px;
+      border-radius: 8px; padding: 12px 16px;
+      display: none; flex-direction: column; gap: 10px; min-width: 220px;
     }
     #clip-panel.visible { display: flex; }
     .clip-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
@@ -231,7 +228,7 @@
     <button class="btn" id="move-btn" onclick="toggleMove()">Переместить</button>
     <div class="sep"></div>
     <button class="btn" id="measure-btn" onclick="toggleMeasure()">Измерить</button>
-    <button class="btn" id="clear-measure-btn" onclick="clearMeasure()" style="display:none">Сбросить</button>
+    <button class="btn" id="measures-list-btn" onclick="toggleMeasureList()" style="display:none">Измерения (0)</button>
     <div class="sep"></div>
     <button class="btn" id="clip-btn" onclick="toggleClip()">Сечение</button>
     <button class="btn" id="clear-clip-btn" onclick="clearClip()" style="display:none">Убрать сечение</button>
@@ -251,12 +248,12 @@
     <span id="dim-x">Ширина: —</span>
     <span id="dim-y">Высота: —</span>
     <span id="dim-z">Глубина: —</span>
-    <span id="measure-result" style="color:#e74c3c; display:none"></span>
   </div>
 
   <canvas id="canvas"></canvas>
   <div id="loading">Загружаю модель...</div>
   <div id="action-hint"></div>
+  <div id="snap-cursor"></div>
 
   <div id="model-list-panel">
     <div id="model-list-title">Загруженные модели</div>
@@ -267,7 +264,14 @@
     </div>
   </div>
 
-  <!-- Панель экспорта -->
+  <div id="measure-list-panel">
+    <div id="measure-list-title">Измерения</div>
+    <div id="measure-list"></div>
+    <div id="measure-list-actions">
+      <button class="btn" onclick="clearAllMeasurements()">Удалить все</button>
+    </div>
+  </div>
+
   <div id="export-panel">
     <div id="export-title">Экспорт выбранной модели</div>
     <input type="text" id="export-name" placeholder="имя файла" value="model">
@@ -343,6 +347,7 @@
     const canvas = document.getElementById('canvas');
     const status = document.getElementById('status');
     const loading = document.getElementById('loading');
+    const snapCursor = document.getElementById('snap-cursor');
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a2e);
@@ -373,10 +378,18 @@
     let clipActive = false;
     let moveMode = false;
     let measureMode = false;
+    let measureFirstPoint = null;
+
+    // Для отличия клика от перетаскивания
+    let pointerDownPos = { x: 0, y: 0 };
+    const CLICK_THRESHOLD = 5; // пикселей
 
     const models = [];
     let selectedModelId = null;
     let nextId = 1;
+
+    const measurements = [];
+    let measNextId = 1;
 
     const MODEL_COLORS = [
       '#1D9E75','#7F77DD','#D85A30','#378ADD',
@@ -389,9 +402,20 @@
       new THREE.Plane(new THREE.Vector3(0, 0, -1), Infinity),
     ];
 
-    let measurePoints = [], measureMarkers = [], measureLine = null;
     const raycaster = new THREE.Raycaster();
     let isDragging = false, dragStart = new THREE.Vector2(), dragPlane = new THREE.Plane();
+
+    const snapMarker = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0xe74c3c })
+    );
+    snapMarker.visible = false;
+    scene.add(snapMarker);
+
+    function getMarkerSize() {
+      const dist = camera.position.distanceTo(controls.target);
+      return dist * 0.008;
+    }
 
     function updateGrid(modelSize) {
       if (grid) scene.remove(grid);
@@ -404,28 +428,41 @@
     function updateRuler(modelSize) {
       const rawValue = modelSize / 2;
       const magnitude = Math.pow(10, Math.floor(Math.log10(rawValue)));
-      const nice = [1,2,5,10,20,50,100,200,500].map(v => v*magnitude).find(v => v>=rawValue) || magnitude*1000;
-      let label = nice>=1000 ? (nice/1000).toFixed(0)+' м' : nice>=10 ? (nice/10).toFixed(1)+' см' : nice.toFixed(0)+' мм';
+      const nice = [1,2,5,10,20,50,100,200,500].map(v=>v*magnitude).find(v=>v>=rawValue)||magnitude*1000;
+      let label = nice>=1000?(nice/1000).toFixed(0)+' м':nice>=10?(nice/10).toFixed(1)+' см':nice.toFixed(0)+' мм';
       document.getElementById('ruler-label').textContent = label;
     }
 
     function updateDimensions(obj) {
       if (!obj) {
-        ['dim-x','dim-y','dim-z'].forEach((id,i) => {
-          document.getElementById(id).textContent = ['Ширина','Высота','Глубина'][i]+': —';
+        ['dim-x','dim-y','dim-z'].forEach((id,i)=>{
+          document.getElementById(id).textContent=['Ширина','Высота','Глубина'][i]+': —';
         });
         return;
       }
       const box = new THREE.Box3().setFromObject(obj);
       const size = box.getSize(new THREE.Vector3());
-      document.getElementById('dim-x').textContent = 'Ширина: '+size.x.toFixed(1)+' мм';
-      document.getElementById('dim-y').textContent = 'Высота: '+size.y.toFixed(1)+' мм';
-      document.getElementById('dim-z').textContent = 'Глубина: '+size.z.toFixed(1)+' мм';
+      document.getElementById('dim-x').textContent='Ширина: '+size.x.toFixed(1)+' мм';
+      document.getElementById('dim-y').textContent='Высота: '+size.y.toFixed(1)+' мм';
+      document.getElementById('dim-z').textContent='Глубина: '+size.z.toFixed(1)+' мм';
     }
 
     updateGrid(100);
 
-    function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      if (snapMarker.visible) snapMarker.scale.setScalar(getMarkerSize());
+      measurements.forEach(m => {
+        const s = getMarkerSize();
+        m.markers.forEach(mk => mk.scale.setScalar(s));
+      });
+      // Обновляем незавершённую первую точку
+      if (measureFirstPoint) {
+        measureFirstPoint.marker.scale.setScalar(getMarkerSize());
+      }
+      renderer.render(scene, camera);
+    }
     animate();
 
     window.addEventListener('resize', () => {
@@ -452,6 +489,14 @@
     }
 
     function getSelectedModel() { return models.find(x => x.id === selectedModelId) || null; }
+
+    function getMouseNDC(e) {
+      const rect = canvas.getBoundingClientRect();
+      return new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1
+      );
+    }
 
     // --- Список моделей ---
 
@@ -485,7 +530,6 @@
         lastModelSize = Math.max(size.x, size.y, size.z);
         updateRuler(lastModelSize);
         syncMoveSliders(m);
-        // Подставляем имя файла в поле экспорта
         document.getElementById('export-name').value = m.name.replace(/\.[^.]+$/, '');
       }
       renderModelList();
@@ -558,18 +602,12 @@
 
     // --- Экспорт ---
 
-    function toggleExport() {
-      document.getElementById('export-panel').classList.toggle('visible');
-      const m = getSelectedModel();
-      if (m) document.getElementById('export-name').value = m.name.replace(/\.[^.]+$/, '');
-    }
+    function toggleExport() { document.getElementById('export-panel').classList.toggle('visible'); }
 
     function downloadBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
+      a.href = url; a.download = filename; a.click();
       URL.revokeObjectURL(url);
     }
 
@@ -577,23 +615,13 @@
       const m = getSelectedModel();
       if (!m) { alert('Сначала выбери модель в списке'); return; }
       const name = document.getElementById('export-name').value.trim() || 'model';
-
       if (format === 'stl') {
-        const exporter = new THREE.STLExporter();
-        const result = exporter.parse(m.obj, { binary: true });
-        downloadBlob(new Blob([result], { type: 'application/octet-stream' }), name + '.stl');
-      }
-
-      else if (format === 'obj') {
-        const exporter = new THREE.OBJExporter();
-        const result = exporter.parse(m.obj);
-        downloadBlob(new Blob([result], { type: 'text/plain' }), name + '.obj');
-      }
-
-      else if (format === 'glb') {
-        const exporter = new THREE.GLTFExporter();
-        exporter.parse(m.obj, (result) => {
-          downloadBlob(new Blob([result], { type: 'application/octet-stream' }), name + '.glb');
+        downloadBlob(new Blob([new THREE.STLExporter().parse(m.obj, { binary: true })], { type: 'application/octet-stream' }), name+'.stl');
+      } else if (format === 'obj') {
+        downloadBlob(new Blob([new THREE.OBJExporter().parse(m.obj)], { type: 'text/plain' }), name+'.obj');
+      } else if (format === 'glb') {
+        new THREE.GLTFExporter().parse(m.obj, (result) => {
+          downloadBlob(new Blob([result], { type: 'application/octet-stream' }), name+'.glb');
         }, { binary: true });
       }
     }
@@ -656,19 +684,23 @@
     function resetModelPosition() {
       const m = getSelectedModel();
       if (!m) return;
-      m.offset = { x: 0, y: 0, z: 0 };
+      m.offset = { x:0, y:0, z:0 };
       m.obj.position.set(
         m.basePosition ? m.basePosition.x : 0,
         m.basePosition ? m.basePosition.y : 0,
         m.basePosition ? m.basePosition.z : 0
       );
       ['x','y','z'].forEach(axis => {
-        document.getElementById('move-' + axis).value = 0;
-        document.getElementById('move-' + axis + '-val').textContent = '0 мм';
+        document.getElementById('move-'+axis).value = 0;
+        document.getElementById('move-'+axis+'-val').textContent = '0 мм';
       });
     }
 
+    // --- Обработчики мыши ---
+
     canvas.addEventListener('pointerdown', (e) => {
+      pointerDownPos = { x: e.clientX, y: e.clientY };
+
       if (!moveMode) return;
       const m = getSelectedModel();
       if (!m) return;
@@ -683,13 +715,32 @@
     });
 
     canvas.addEventListener('pointermove', (e) => {
+      // Снаппинг курсор в режиме измерения
+      if (measureMode && models.length > 0) {
+        raycaster.setFromCamera(getMouseNDC(e), camera);
+        const hits = raycaster.intersectObjects(getAllMeshes(), true);
+        if (hits.length > 0) {
+          snapMarker.position.copy(hits[0].point);
+          snapMarker.scale.setScalar(getMarkerSize());
+          snapMarker.visible = true;
+          snapCursor.style.display = 'block';
+          snapCursor.style.left = e.clientX + 'px';
+          snapCursor.style.top = (e.clientY - 82) + 'px';
+        } else {
+          snapMarker.visible = false;
+          snapCursor.style.display = 'none';
+        }
+      } else {
+        snapMarker.visible = false;
+        snapCursor.style.display = 'none';
+      }
+
+      // Перетаскивание в режиме перемещения
       if (!moveMode || !isDragging) return;
       const m = getSelectedModel();
       if (!m) return;
       const rect = canvas.getBoundingClientRect();
-      const ndc = (cx, cy) => new THREE.Vector2(
-        ((cx-rect.left)/rect.width)*2-1, -((cy-rect.top)/rect.height)*2+1
-      );
+      const ndc = (cx, cy) => new THREE.Vector2(((cx-rect.left)/rect.width)*2-1,-((cy-rect.top)/rect.height)*2+1);
       const r1 = new THREE.Raycaster(); r1.setFromCamera(ndc(dragStart.x, dragStart.y), camera);
       const r2 = new THREE.Raycaster(); r2.setFromCamera(ndc(e.clientX, e.clientY), camera);
       const p1 = new THREE.Vector3(), p2 = new THREE.Vector3();
@@ -710,7 +761,138 @@
       e.preventDefault();
     });
 
-    canvas.addEventListener('pointerup', () => { isDragging = false; });
+    canvas.addEventListener('pointerup', (e) => {
+      isDragging = false;
+
+      // Проверяем — это клик или перетаскивание?
+      if (!measureMode || models.length === 0) return;
+      const dx = Math.abs(e.clientX - pointerDownPos.x);
+      const dy = Math.abs(e.clientY - pointerDownPos.y);
+      if (dx > CLICK_THRESHOLD || dy > CLICK_THRESHOLD) return; // это было вращение — игнорируем
+
+      // Это клик — ставим точку
+      raycaster.setFromCamera(getMouseNDC(e), camera);
+      const hits = raycaster.intersectObjects(getAllMeshes(), true);
+      if (hits.length === 0) return;
+      const point = hits[0].point.clone();
+
+      if (!measureFirstPoint) {
+        const geo = new THREE.SphereGeometry(1, 8, 8);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xf39c12 });
+        const marker = new THREE.Mesh(geo, mat);
+        marker.position.copy(point);
+        marker.scale.setScalar(getMarkerSize());
+        scene.add(marker);
+        measureFirstPoint = { point, marker };
+        document.getElementById('action-hint').textContent = 'Покрути модель и кликни на вторую точку';
+      } else {
+        scene.remove(measureFirstPoint.marker);
+        addMeasurement(measureFirstPoint.point, point);
+        measureFirstPoint = null;
+        document.getElementById('action-hint').textContent = 'Готово! Кликни снова для нового измерения';
+        setTimeout(() => {
+          if (measureMode) document.getElementById('action-hint').textContent = 'Кликни на первую точку модели';
+        }, 2000);
+      }
+    });
+
+    // --- Измерения ---
+
+    function toggleMeasure() {
+      measureMode = !measureMode;
+      const btn = document.getElementById('measure-btn');
+      const hint = document.getElementById('action-hint');
+      if (measureMode) {
+        if (moveMode) toggleMove();
+        btn.classList.add('active');
+        btn.textContent = 'Измерение вкл';
+        hint.className = 'measure';
+        hint.textContent = 'Кликни на первую точку модели';
+        hint.style.display = 'block';
+        // controls.enabled остаётся true — вращение работает!
+        measureFirstPoint = null;
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = 'Измерить';
+        hint.style.display = 'none';
+        snapMarker.visible = false;
+        snapCursor.style.display = 'none';
+        if (measureFirstPoint) {
+          scene.remove(measureFirstPoint.marker);
+          measureFirstPoint = null;
+        }
+      }
+    }
+
+    function toggleMeasureList() {
+      document.getElementById('measure-list-panel').classList.toggle('visible');
+    }
+
+    function renderMeasureList() {
+      const list = document.getElementById('measure-list');
+      list.innerHTML = '';
+      measurements.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'measure-item';
+        item.innerHTML = `
+          <span class="measure-item-label">№${m.id}</span>
+          <span class="measure-item-val">${m.label}</span>
+          <button class="measure-item-del" onclick="removeMeasurement(${m.id})">✕</button>
+        `;
+        list.appendChild(item);
+      });
+      const btn = document.getElementById('measures-list-btn');
+      if (measurements.length > 0) {
+        btn.style.display = 'inline-block';
+        btn.textContent = `Измерения (${measurements.length})`;
+      } else {
+        btn.style.display = 'none';
+        document.getElementById('measure-list-panel').classList.remove('visible');
+      }
+    }
+
+    function addMeasurement(p1, p2) {
+      const dist = p1.distanceTo(p2);
+      const label = dist>=1000?(dist/1000).toFixed(2)+' м':dist>=10?(dist/10).toFixed(2)+' см':dist.toFixed(2)+' мм';
+      const id = measNextId++;
+      const markers = [];
+      [p1, p2].forEach(p => {
+        const sphere = new THREE.Mesh(
+          new THREE.SphereGeometry(1, 8, 8),
+          new THREE.MeshBasicMaterial({ color: 0xe74c3c })
+        );
+        sphere.position.copy(p);
+        sphere.scale.setScalar(getMarkerSize());
+        scene.add(sphere);
+        markers.push(sphere);
+      });
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([p1, p2]),
+        new THREE.LineBasicMaterial({ color: 0xe74c3c })
+      );
+      scene.add(line);
+      measurements.push({ id, p1, p2, label, markers, line });
+      renderMeasureList();
+    }
+
+    function removeMeasurement(id) {
+      const idx = measurements.findIndex(m => m.id === id);
+      if (idx === -1) return;
+      const m = measurements[idx];
+      m.markers.forEach(mk => scene.remove(mk));
+      scene.remove(m.line);
+      measurements.splice(idx, 1);
+      renderMeasureList();
+    }
+
+    function clearAllMeasurements() {
+      measurements.forEach(m => {
+        m.markers.forEach(mk => scene.remove(mk));
+        scene.remove(m.line);
+      });
+      measurements.length = 0;
+      renderMeasureList();
+    }
 
     // --- Сечение ---
 
@@ -734,9 +916,7 @@
       clipPlanes.forEach(p => p.constant = Infinity);
       models.forEach(m => applyMaterial(m.obj, m.color, []));
       ['clip-x','clip-y','clip-z'].forEach(id => { document.getElementById(id).value = 1; });
-      ['clip-x-val','clip-y-val','clip-z-val'].forEach(id => {
-        document.getElementById(id).textContent = 'выкл';
-      });
+      ['clip-x-val','clip-y-val','clip-z-val'].forEach(id => { document.getElementById(id).textContent = 'выкл'; });
     }
 
     function updateClip() {
@@ -747,89 +927,11 @@
       const center = box.getCenter(new THREE.Vector3());
       ['x','y','z'].forEach((axis, i) => {
         const val = parseFloat(document.getElementById('clip-'+axis).value);
-        clipPlanes[i].constant = [center.x,center.y,center.z][i] + val * [size.x,size.y,size.z][i] * 0.5;
+        clipPlanes[i].constant = [center.x,center.y,center.z][i]+val*[size.x,size.y,size.z][i]*0.5;
         document.getElementById('clip-'+axis+'-val').textContent = Math.round((val+1)/2*100)+'%';
       });
       models.forEach(m => applyMaterial(m.obj, m.color, clipPlanes));
     }
-
-    // --- Измерение ---
-
-    function toggleMeasure() {
-      measureMode = !measureMode;
-      const btn = document.getElementById('measure-btn');
-      const hint = document.getElementById('action-hint');
-      if (measureMode) {
-        if (moveMode) toggleMove();
-        btn.classList.add('active');
-        btn.textContent = 'Измерение вкл';
-        hint.className = 'measure';
-        hint.textContent = 'Кликни на первую точку модели';
-        hint.style.display = 'block';
-        controls.enabled = false;
-        clearMeasure();
-      } else {
-        btn.classList.remove('active');
-        btn.textContent = 'Измерить';
-        hint.style.display = 'none';
-        controls.enabled = true;
-      }
-    }
-
-    function clearMeasure() {
-      measurePoints = [];
-      measureMarkers.forEach(m => scene.remove(m));
-      measureMarkers = [];
-      if (measureLine) { scene.remove(measureLine); measureLine = null; }
-      document.getElementById('measure-result').style.display = 'none';
-      document.getElementById('clear-measure-btn').style.display = 'none';
-      if (measureMode) document.getElementById('action-hint').textContent = 'Кликни на первую точку модели';
-    }
-
-    canvas.addEventListener('click', (e) => {
-      if (!measureMode || models.length === 0) return;
-      const rect = canvas.getBoundingClientRect();
-      const mouse = new THREE.Vector2(
-        ((e.clientX-rect.left)/rect.width)*2-1,
-        -((e.clientY-rect.top)/rect.height)*2+1
-      );
-      raycaster.setFromCamera(mouse, camera);
-      const hits = raycaster.intersectObjects(getAllMeshes(), true);
-      if (hits.length === 0) return;
-      const point = hits[0].point.clone();
-      if (measurePoints.length === 0) {
-        measurePoints.push(point);
-        const geo = new THREE.SphereGeometry(lastModelSize*0.015, 12, 12);
-        const sphere = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xe74c3c }));
-        sphere.position.copy(point);
-        scene.add(sphere);
-        measureMarkers.push(sphere);
-        document.getElementById('action-hint').textContent = 'Кликни на вторую точку модели';
-      } else if (measurePoints.length === 1) {
-        measurePoints.push(point);
-        const geo = new THREE.SphereGeometry(lastModelSize*0.015, 12, 12);
-        const sphere = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xe74c3c }));
-        sphere.position.copy(point);
-        scene.add(sphere);
-        measureMarkers.push(sphere);
-        measureLine = new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints(measurePoints),
-          new THREE.LineBasicMaterial({ color: 0xe74c3c })
-        );
-        scene.add(measureLine);
-        const dist = measurePoints[0].distanceTo(measurePoints[1]);
-        const label = dist>=1000 ? (dist/1000).toFixed(2)+' м' : dist>=10 ? (dist/10).toFixed(2)+' см' : dist.toFixed(2)+' мм';
-        const res = document.getElementById('measure-result');
-        res.textContent = 'Расстояние: ' + label;
-        res.style.display = 'block';
-        document.getElementById('clear-measure-btn').style.display = 'inline-block';
-        document.getElementById('action-hint').style.display = 'none';
-        measureMode = false;
-        controls.enabled = true;
-        document.getElementById('measure-btn').classList.remove('active');
-        document.getElementById('measure-btn').textContent = 'Измерить';
-      }
-    });
 
     // --- Зум ---
 
@@ -887,8 +989,7 @@
       loading.style.display = 'block';
       try {
         if (ext === 'stl') {
-          const geometry = new THREE.STLLoader().parse(await file.arrayBuffer());
-          onModelLoaded(new THREE.Mesh(geometry, new THREE.MeshStandardMaterial()), file.name);
+          onModelLoaded(new THREE.Mesh(new THREE.STLLoader().parse(await file.arrayBuffer()), new THREE.MeshStandardMaterial()), file.name);
           return;
         }
         if (ext === 'obj') { onModelLoaded(new THREE.OBJLoader().parse(await file.text()), file.name); return; }
