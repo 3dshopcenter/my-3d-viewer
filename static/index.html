@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3D Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a2e; font-family: sans-serif; color: white; }
+
+    #toolbar {
+      padding: 10px 16px;
+      background: #16213e;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    #toolbar h1 { font-size: 15px; font-weight: 500; margin-right: 4px; }
+    .btn {
+      background: #0f3460;
+      color: white;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn:hover { background: #533483; }
+    .btn.active { background: #c0392b; }
+    .btn.move-active { background: #e67e22; }
+    .sep { width: 1px; height: 24px; background: #2a3a5e; }
+    #status { font-size: 12px; color: #aaa; margin-left: auto; }
+    #file-input { display: none; }
+
+    #info-bar {
+      padding: 6px 16px;
+      background: #0d1b2e;
+      font-size: 12px;
+      color: #7a9cc0;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    canvas { width: 100%; height: calc(100vh - 82px); display: block; }
+
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.75);
+      padding: 20px 32px;
+      border-radius: 10px;
+      font-size: 15px;
+      display: none;
+    }
+
+    #action-hint {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+      pointer-events: none;
+    }
+    #action-hint.measure { background: rgba(192,57,43,0.85); }
+    #action-hint.move    { background: rgba(230,126,34,0.85); }
+
+    #model-list-panel {
+      position: absolute;
+      left: 16px;
+      top: 90px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 8px;
+      padding: 10px;
+      min-width: 200px;
+      max-width: 260px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 50vh;
+      overflow-y: auto;
+    }
+    #model-list-panel.visible { display: flex; }
+    #model-list-title { font-size: 11px; color: #aaa; margin-bottom: 2px; }
+    .model-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      cursor: pointer; font-size: 12px;
+      border: 1.5px solid transparent;
+    }
+    .model-item.selected { border-color: #533483; background: rgba(83,52,131,0.3); }
+    .model-item:hover { background: rgba(255,255,255,0.1); }
+    .model-item-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    .model-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .model-item-del { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 14px; padding: 0 2px; }
+    .model-item-del:hover { color: #ff6b6b; }
+    #model-list-actions { display: flex; gap: 6px; margin-top: 4px; }
+    #model-list-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
+
+    /* Экспорт */
+    #export-panel {
+      position: absolute;
+      right: 20px;
+      bottom: 120px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 160px;
+    }
+    #export-panel.visible { display: flex; }
+    #export-title { font-size: 11px; color: #aaa; }
+    #export-name {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px;
+      color: white;
+      font-size: 12px;
+      padding: 5px 8px;
+      width: 100%;
+    }
+    .export-btn {
+      background: #0f3460;
+      color: white;
+      border: none;
+      padding: 7px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      text-align: left;
+    }
+    .export-btn:hover { background: #533483; }
+    .export-btn span { color: #7a9cc0; font-size: 11px; margin-left: 4px; }
+
+    #move-panel {
+      position: absolute;
+      left: 16px;
+      bottom: 100px;
+      background: rgba(0,0,0,0.75);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 180px;
+    }
+    #move-panel.visible { display: flex; }
+    #move-panel-title { font-size: 11px; color: #aaa; }
+    .move-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .move-row label { width: 16px; color: #aaa; }
+    .move-row input[type=range] { flex: 1; }
+    .move-row span { width: 52px; text-align: right; font-size: 11px; color: #7a9cc0; }
+
+    #clip-panel {
+      position: absolute;
+      left: 16px;
+      bottom: 20px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 220px;
+    }
+    #clip-panel.visible { display: flex; }
+    .clip-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .clip-row label { width: 20px; color: #aaa; }
+    .clip-row input[type=range] { flex: 1; }
+    .clip-row span { width: 48px; text-align: right; font-size: 11px; color: #7a9cc0; }
+    #clip-title { font-size: 12px; color: #aaa; margin-bottom: 2px; }
+
+    #zoom-btns {
+      position: absolute; right: 20px; top: 50%;
+      transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .zoom-btn {
+      width: 44px; height: 44px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px; color: white; font-size: 22px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      user-select: none; -webkit-user-select: none;
+    }
+    .zoom-btn:active { background: rgba(83,52,131,0.8); }
+
+    #ruler {
+      position: absolute; bottom: 20px; right: 20px;
+      background: rgba(0,0,0,0.6); border-radius: 6px;
+      padding: 8px 12px; font-size: 12px; color: white;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+    }
+    #ruler-row { display: flex; align-items: center; gap: 6px; }
+    #ruler-bar { height: 4px; background: white; border-radius: 2px; width: 80px; }
+    #ruler-hint { font-size: 10px; color: #aaa; }
+
+    #color-picker-wrap { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #aaa; }
+    #color-picker { width: 28px; height: 28px; border: none; border-radius: 4px; cursor: pointer; padding: 0; background: none; }
+
+    body.light { background: #f0f0f0; }
+    body.light #toolbar { background: #e0e8f0; color: #222; }
+    body.light #info-bar { background: #d0dcea; color: #336; }
+    body.light #status { color: #555; }
+    body.light .btn { background: #3a6ea8; }
+    body.light .btn:hover { background: #533483; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <h1>3D Viewer</h1>
+    <button class="btn" onclick="document.getElementById('file-input').click()">Добавить модель</button>
+    <input type="file" id="file-input" accept=".stp,.step,.igs,.iges,.stl,.glb,.gltf,.obj,.fbx">
+    <div class="sep"></div>
+    <button class="btn" onclick="setView('front')">Спереди</button>
+    <button class="btn" onclick="setView('side')">Сбоку</button>
+    <button class="btn" onclick="setView('top')">Сверху</button>
+    <button class="btn" onclick="setView('iso')">3D</button>
+    <div class="sep"></div>
+    <button class="btn" id="models-btn" onclick="toggleModelList()">Модели (0)</button>
+    <div class="sep"></div>
+    <button class="btn" id="move-btn" onclick="toggleMove()">Переместить</button>
+    <div class="sep"></div>
+    <button class="btn" id="measure-btn" onclick="toggleMeasure()">Измерить</button>
+    <button class="btn" id="clear-measure-btn" onclick="clearMeasure()" style="display:none">Сбросить</button>
+    <div class="sep"></div>
+    <button class="btn" id="clip-btn" onclick="toggleClip()">Сечение</button>
+    <button class="btn" id="clear-clip-btn" onclick="clearClip()" style="display:none">Убрать сечение</button>
+    <div class="sep"></div>
+    <button class="btn" id="export-btn" onclick="toggleExport()">Экспорт</button>
+    <div class="sep"></div>
+    <div id="color-picker-wrap">
+      <span>Цвет:</span>
+      <input type="color" id="color-picker" value="#1D9E75" oninput="changeColor(this.value)">
+    </div>
+    <div class="sep"></div>
+    <button class="btn" id="theme-btn" onclick="toggleTheme()">Светлая тема</button>
+    <span id="status">Файл не загружен</span>
+  </div>
+
+  <div id="info-bar">
+    <span id="dim-x">Ширина: —</span>
+    <span id="dim-y">Высота: —</span>
+    <span id="dim-z">Глубина: —</span>
+    <span id="measure-result" style="color:#e74c3c; display:none"></span>
+  </div>
+
+  <canvas id="canvas"></canvas>
+  <div id="loading">Загружаю модель...</div>
+  <div id="action-hint"></div>
+
+  <div id="model-list-panel">
+    <div id="model-list-title">Загруженные модели</div>
+    <div id="model-list"></div>
+    <div id="model-list-actions">
+      <button class="btn" onclick="fitAllModels()">Показать все</button>
+      <button class="btn" onclick="removeAllModels()">Удалить все</button>
+    </div>
+  </div>
+
+  <!-- Панель экспорта -->
+  <div id="export-panel">
+    <div id="export-title">Экспорт выбранной модели</div>
+    <input type="text" id="export-name" placeholder="имя файла" value="model">
+    <button class="export-btn" onclick="exportModel('stl')">Скачать STL <span>3D-печать</span></button>
+    <button class="export-btn" onclick="exportModel('obj')">Скачать OBJ <span>универсальный</span></button>
+    <button class="export-btn" onclick="exportModel('glb')">Скачать GLB <span>для веба</span></button>
+  </div>
+
+  <div id="move-panel">
+    <div id="move-panel-title">Позиция выбранной модели</div>
+    <div class="move-row">
+      <label>X</label>
+      <input type="range" id="move-x" min="-1000" max="1000" step="1" value="0" oninput="applyMove()">
+      <span id="move-x-val">0 мм</span>
+    </div>
+    <div class="move-row">
+      <label>Y</label>
+      <input type="range" id="move-y" min="-1000" max="1000" step="1" value="0" oninput="applyMove()">
+      <span id="move-y-val">0 мм</span>
+    </div>
+    <div class="move-row">
+      <label>Z</label>
+      <input type="range" id="move-z" min="-1000" max="1000" step="1" value="0" oninput="applyMove()">
+      <span id="move-z-val">0 мм</span>
+    </div>
+    <button class="btn" onclick="resetModelPosition()">Сбросить позицию</button>
+  </div>
+
+  <div id="clip-panel">
+    <div id="clip-title">Сечение плоскостью</div>
+    <div class="clip-row">
+      <label>X</label>
+      <input type="range" id="clip-x" min="-1" max="1" step="0.01" value="1" oninput="updateClip()">
+      <span id="clip-x-val">выкл</span>
+    </div>
+    <div class="clip-row">
+      <label>Y</label>
+      <input type="range" id="clip-y" min="-1" max="1" step="0.01" value="1" oninput="updateClip()">
+      <span id="clip-y-val">выкл</span>
+    </div>
+    <div class="clip-row">
+      <label>Z</label>
+      <input type="range" id="clip-z" min="-1" max="1" step="0.01" value="1" oninput="updateClip()">
+      <span id="clip-z-val">выкл</span>
+    </div>
+  </div>
+
+  <div id="zoom-btns">
+    <button class="zoom-btn" onclick="zoomIn()">+</button>
+    <button class="zoom-btn" onclick="resetZoom()">⊙</button>
+    <button class="zoom-btn" onclick="zoomOut()">−</button>
+  </div>
+
+  <div id="ruler">
+    <div id="ruler-row">
+      <div id="ruler-bar"></div>
+      <span id="ruler-label">—</span>
+    </div>
+    <span id="ruler-hint">масштаб</span>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/FBXLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/STLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/exporters/STLExporter.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/exporters/OBJExporter.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/exporters/GLTFExporter.js"></script>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const status = document.getElementById('status');
+    const loading = document.getElementById('loading');
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a2e);
+
+    const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.01, 100000);
+    camera.position.set(300, 200, 400);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, localClippingEnabled: true });
+    renderer.setSize(innerWidth, innerHeight - 82);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.localClippingEnabled = true;
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+    dirLight.position.set(500, 800, 500);
+    scene.add(dirLight);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    fillLight.position.set(-500, -200, -500);
+    scene.add(fillLight);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    let grid = null;
+    let lastModelSize = 100;
+    let isLight = false;
+    let clipActive = false;
+    let moveMode = false;
+    let measureMode = false;
+
+    const models = [];
+    let selectedModelId = null;
+    let nextId = 1;
+
+    const MODEL_COLORS = [
+      '#1D9E75','#7F77DD','#D85A30','#378ADD',
+      '#639922','#D4537E','#BA7517','#E24B4A'
+    ];
+
+    const clipPlanes = [
+      new THREE.Plane(new THREE.Vector3(-1, 0, 0), Infinity),
+      new THREE.Plane(new THREE.Vector3(0, -1, 0), Infinity),
+      new THREE.Plane(new THREE.Vector3(0, 0, -1), Infinity),
+    ];
+
+    let measurePoints = [], measureMarkers = [], measureLine = null;
+    const raycaster = new THREE.Raycaster();
+    let isDragging = false, dragStart = new THREE.Vector2(), dragPlane = new THREE.Plane();
+
+    function updateGrid(modelSize) {
+      if (grid) scene.remove(grid);
+      const fieldSize = Math.max(modelSize * 3, 100);
+      const cells = Math.round(fieldSize / 10);
+      grid = new THREE.GridHelper(fieldSize, cells, 0x444466, 0x333355);
+      scene.add(grid);
+    }
+
+    function updateRuler(modelSize) {
+      const rawValue = modelSize / 2;
+      const magnitude = Math.pow(10, Math.floor(Math.log10(rawValue)));
+      const nice = [1,2,5,10,20,50,100,200,500].map(v => v*magnitude).find(v => v>=rawValue) || magnitude*1000;
+      let label = nice>=1000 ? (nice/1000).toFixed(0)+' м' : nice>=10 ? (nice/10).toFixed(1)+' см' : nice.toFixed(0)+' мм';
+      document.getElementById('ruler-label').textContent = label;
+    }
+
+    function updateDimensions(obj) {
+      if (!obj) {
+        ['dim-x','dim-y','dim-z'].forEach((id,i) => {
+          document.getElementById(id).textContent = ['Ширина','Высота','Глубина'][i]+': —';
+        });
+        return;
+      }
+      const box = new THREE.Box3().setFromObject(obj);
+      const size = box.getSize(new THREE.Vector3());
+      document.getElementById('dim-x').textContent = 'Ширина: '+size.x.toFixed(1)+' мм';
+      document.getElementById('dim-y').textContent = 'Высота: '+size.y.toFixed(1)+' мм';
+      document.getElementById('dim-z').textContent = 'Глубина: '+size.z.toFixed(1)+' мм';
+    }
+
+    updateGrid(100);
+
+    function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+    animate();
+
+    window.addEventListener('resize', () => {
+      renderer.setSize(innerWidth, innerHeight - 82);
+      camera.aspect = innerWidth / (innerHeight - 82);
+      camera.updateProjectionMatrix();
+    });
+
+    function applyMaterial(obj, color, planes) {
+      obj.traverse((child) => {
+        if (child.isMesh) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(color), metalness: 0.2, roughness: 0.6,
+            side: THREE.DoubleSide, clippingPlanes: planes, clipShadows: true
+          });
+        }
+      });
+    }
+
+    function getAllMeshes() {
+      const meshes = [];
+      models.forEach(m => m.obj.traverse(c => { if (c.isMesh) meshes.push(c); }));
+      return meshes;
+    }
+
+    function getSelectedModel() { return models.find(x => x.id === selectedModelId) || null; }
+
+    // --- Список моделей ---
+
+    function renderModelList() {
+      const list = document.getElementById('model-list');
+      list.innerHTML = '';
+      models.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'model-item' + (m.id === selectedModelId ? ' selected' : '');
+        item.innerHTML = `
+          <div class="model-item-color" style="background:${m.color}"></div>
+          <span class="model-item-name" title="${m.name}">${m.name}</span>
+          <button class="model-item-del" onclick="removeModel(${m.id},event)">✕</button>
+        `;
+        item.addEventListener('click', () => selectModel(m.id));
+        list.appendChild(item);
+      });
+      document.getElementById('models-btn').textContent = `Модели (${models.length})`;
+    }
+
+    function toggleModelList() { document.getElementById('model-list-panel').classList.toggle('visible'); }
+
+    function selectModel(id) {
+      selectedModelId = id;
+      const m = getSelectedModel();
+      if (m) {
+        document.getElementById('color-picker').value = m.color;
+        updateDimensions(m.obj);
+        const box = new THREE.Box3().setFromObject(m.obj);
+        const size = box.getSize(new THREE.Vector3());
+        lastModelSize = Math.max(size.x, size.y, size.z);
+        updateRuler(lastModelSize);
+        syncMoveSliders(m);
+        // Подставляем имя файла в поле экспорта
+        document.getElementById('export-name').value = m.name.replace(/\.[^.]+$/, '');
+      }
+      renderModelList();
+    }
+
+    function removeModel(id, e) {
+      if (e) e.stopPropagation();
+      const idx = models.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      scene.remove(models[idx].obj);
+      models.splice(idx, 1);
+      if (selectedModelId === id) {
+        selectedModelId = models.length > 0 ? models[models.length-1].id : null;
+        if (selectedModelId) selectModel(selectedModelId); else updateDimensions(null);
+      }
+      renderModelList();
+      if (models.length === 0) status.textContent = 'Файл не загружен';
+    }
+
+    function removeAllModels() {
+      models.forEach(m => scene.remove(m.obj));
+      models.length = 0;
+      selectedModelId = null;
+      updateDimensions(null);
+      renderModelList();
+      status.textContent = 'Файл не загружен';
+    }
+
+    function fitAllModels() {
+      if (models.length === 0) return;
+      const box = new THREE.Box3();
+      models.forEach(m => box.expandByObject(m.obj));
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      lastModelSize = maxDim;
+      camera.position.set(center.x+maxDim*1.5, center.y+maxDim, center.z+maxDim*2);
+      camera.lookAt(center);
+      controls.target.copy(center);
+      controls.update();
+      updateGrid(maxDim);
+      updateRuler(maxDim);
+    }
+
+    function setView(view) {
+      const d = lastModelSize * 2.5;
+      if (view==='front') camera.position.set(0,0,d);
+      else if (view==='side') camera.position.set(d,0,0);
+      else if (view==='top') camera.position.set(0,d,0);
+      else if (view==='iso') camera.position.set(d,d*0.7,d);
+      camera.lookAt(0,0,0);
+      controls.target.set(0,0,0);
+      controls.update();
+    }
+
+    function changeColor(hex) {
+      const m = getSelectedModel();
+      if (!m) return;
+      m.color = hex;
+      applyMaterial(m.obj, hex, clipActive ? clipPlanes : []);
+      renderModelList();
+    }
+
+    function toggleTheme() {
+      isLight = !isLight;
+      document.body.classList.toggle('light', isLight);
+      scene.background = new THREE.Color(isLight ? 0xf0f0f0 : 0x1a1a2e);
+      document.getElementById('theme-btn').textContent = isLight ? 'Тёмная тема' : 'Светлая тема';
+    }
+
+    // --- Экспорт ---
+
+    function toggleExport() {
+      document.getElementById('export-panel').classList.toggle('visible');
+      const m = getSelectedModel();
+      if (m) document.getElementById('export-name').value = m.name.replace(/\.[^.]+$/, '');
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportModel(format) {
+      const m = getSelectedModel();
+      if (!m) { alert('Сначала выбери модель в списке'); return; }
+      const name = document.getElementById('export-name').value.trim() || 'model';
+
+      if (format === 'stl') {
+        const exporter = new THREE.STLExporter();
+        const result = exporter.parse(m.obj, { binary: true });
+        downloadBlob(new Blob([result], { type: 'application/octet-stream' }), name + '.stl');
+      }
+
+      else if (format === 'obj') {
+        const exporter = new THREE.OBJExporter();
+        const result = exporter.parse(m.obj);
+        downloadBlob(new Blob([result], { type: 'text/plain' }), name + '.obj');
+      }
+
+      else if (format === 'glb') {
+        const exporter = new THREE.GLTFExporter();
+        exporter.parse(m.obj, (result) => {
+          downloadBlob(new Blob([result], { type: 'application/octet-stream' }), name + '.glb');
+        }, { binary: true });
+      }
+    }
+
+    // --- Перемещение ---
+
+    function toggleMove() {
+      moveMode = !moveMode;
+      const btn = document.getElementById('move-btn');
+      const panel = document.getElementById('move-panel');
+      const hint = document.getElementById('action-hint');
+      if (moveMode) {
+        if (measureMode) toggleMeasure();
+        btn.classList.add('move-active');
+        btn.textContent = 'Перемещение вкл';
+        panel.classList.add('visible');
+        hint.className = 'move';
+        hint.textContent = 'Выбери модель в списке и двигай слайдеры или тяни по экрану';
+        hint.style.display = 'block';
+        controls.enabled = false;
+        const m = getSelectedModel();
+        if (m) syncMoveSliders(m);
+      } else {
+        btn.classList.remove('move-active');
+        btn.textContent = 'Переместить';
+        panel.classList.remove('visible');
+        hint.style.display = 'none';
+        controls.enabled = true;
+      }
+    }
+
+    function syncMoveSliders(m) {
+      const range = Math.max(lastModelSize * 5, 500);
+      ['x','y','z'].forEach(axis => {
+        const el = document.getElementById('move-' + axis);
+        el.min = -range; el.max = range;
+        const val = m.offset ? (m.offset[axis] || 0) : 0;
+        el.value = val;
+        document.getElementById('move-' + axis + '-val').textContent = val.toFixed(0) + ' мм';
+      });
+    }
+
+    function applyMove() {
+      const m = getSelectedModel();
+      if (!m) return;
+      const x = parseFloat(document.getElementById('move-x').value);
+      const y = parseFloat(document.getElementById('move-y').value);
+      const z = parseFloat(document.getElementById('move-z').value);
+      m.offset = { x, y, z };
+      m.obj.position.set(
+        (m.basePosition ? m.basePosition.x : 0) + x,
+        (m.basePosition ? m.basePosition.y : 0) + y,
+        (m.basePosition ? m.basePosition.z : 0) + z
+      );
+      document.getElementById('move-x-val').textContent = x.toFixed(0) + ' мм';
+      document.getElementById('move-y-val').textContent = y.toFixed(0) + ' мм';
+      document.getElementById('move-z-val').textContent = z.toFixed(0) + ' мм';
+    }
+
+    function resetModelPosition() {
+      const m = getSelectedModel();
+      if (!m) return;
+      m.offset = { x: 0, y: 0, z: 0 };
+      m.obj.position.set(
+        m.basePosition ? m.basePosition.x : 0,
+        m.basePosition ? m.basePosition.y : 0,
+        m.basePosition ? m.basePosition.z : 0
+      );
+      ['x','y','z'].forEach(axis => {
+        document.getElementById('move-' + axis).value = 0;
+        document.getElementById('move-' + axis + '-val').textContent = '0 мм';
+      });
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (!moveMode) return;
+      const m = getSelectedModel();
+      if (!m) return;
+      isDragging = true;
+      const box = new THREE.Box3().setFromObject(m.obj);
+      dragPlane.setFromNormalAndCoplanarPoint(
+        camera.getWorldDirection(new THREE.Vector3()).negate(),
+        box.getCenter(new THREE.Vector3())
+      );
+      dragStart.set(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!moveMode || !isDragging) return;
+      const m = getSelectedModel();
+      if (!m) return;
+      const rect = canvas.getBoundingClientRect();
+      const ndc = (cx, cy) => new THREE.Vector2(
+        ((cx-rect.left)/rect.width)*2-1, -((cy-rect.top)/rect.height)*2+1
+      );
+      const r1 = new THREE.Raycaster(); r1.setFromCamera(ndc(dragStart.x, dragStart.y), camera);
+      const r2 = new THREE.Raycaster(); r2.setFromCamera(ndc(e.clientX, e.clientY), camera);
+      const p1 = new THREE.Vector3(), p2 = new THREE.Vector3();
+      r1.ray.intersectPlane(dragPlane, p1);
+      r2.ray.intersectPlane(dragPlane, p2);
+      if (p1 && p2) {
+        const delta = p2.clone().sub(p1);
+        const offset = m.offset || { x:0, y:0, z:0 };
+        m.offset = { x: offset.x+delta.x, y: offset.y+delta.y, z: offset.z+delta.z };
+        const base = m.basePosition || new THREE.Vector3();
+        m.obj.position.set(base.x+m.offset.x, base.y+m.offset.y, base.z+m.offset.z);
+        ['x','y','z'].forEach(axis => {
+          document.getElementById('move-'+axis).value = m.offset[axis].toFixed(0);
+          document.getElementById('move-'+axis+'-val').textContent = m.offset[axis].toFixed(0)+' мм';
+        });
+      }
+      dragStart.set(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+
+    canvas.addEventListener('pointerup', () => { isDragging = false; });
+
+    // --- Сечение ---
+
+    function toggleClip() {
+      clipActive = !clipActive;
+      if (clipActive) {
+        document.getElementById('clip-panel').classList.add('visible');
+        document.getElementById('clip-btn').classList.add('active');
+        document.getElementById('clip-btn').textContent = 'Сечение вкл';
+        document.getElementById('clear-clip-btn').style.display = 'inline-block';
+        updateClip();
+      } else { clearClip(); }
+    }
+
+    function clearClip() {
+      clipActive = false;
+      document.getElementById('clip-panel').classList.remove('visible');
+      document.getElementById('clip-btn').classList.remove('active');
+      document.getElementById('clip-btn').textContent = 'Сечение';
+      document.getElementById('clear-clip-btn').style.display = 'none';
+      clipPlanes.forEach(p => p.constant = Infinity);
+      models.forEach(m => applyMaterial(m.obj, m.color, []));
+      ['clip-x','clip-y','clip-z'].forEach(id => { document.getElementById(id).value = 1; });
+      ['clip-x-val','clip-y-val','clip-z-val'].forEach(id => {
+        document.getElementById(id).textContent = 'выкл';
+      });
+    }
+
+    function updateClip() {
+      if (models.length === 0) return;
+      const box = new THREE.Box3();
+      models.forEach(m => box.expandByObject(m.obj));
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      ['x','y','z'].forEach((axis, i) => {
+        const val = parseFloat(document.getElementById('clip-'+axis).value);
+        clipPlanes[i].constant = [center.x,center.y,center.z][i] + val * [size.x,size.y,size.z][i] * 0.5;
+        document.getElementById('clip-'+axis+'-val').textContent = Math.round((val+1)/2*100)+'%';
+      });
+      models.forEach(m => applyMaterial(m.obj, m.color, clipPlanes));
+    }
+
+    // --- Измерение ---
+
+    function toggleMeasure() {
+      measureMode = !measureMode;
+      const btn = document.getElementById('measure-btn');
+      const hint = document.getElementById('action-hint');
+      if (measureMode) {
+        if (moveMode) toggleMove();
+        btn.classList.add('active');
+        btn.textContent = 'Измерение вкл';
+        hint.className = 'measure';
+        hint.textContent = 'Кликни на первую точку модели';
+        hint.style.display = 'block';
+        controls.enabled = false;
+        clearMeasure();
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = 'Измерить';
+        hint.style.display = 'none';
+        controls.enabled = true;
+      }
+    }
+
+    function clearMeasure() {
+      measurePoints = [];
+      measureMarkers.forEach(m => scene.remove(m));
+      measureMarkers = [];
+      if (measureLine) { scene.remove(measureLine); measureLine = null; }
+      document.getElementById('measure-result').style.display = 'none';
+      document.getElementById('clear-measure-btn').style.display = 'none';
+      if (measureMode) document.getElementById('action-hint').textContent = 'Кликни на первую точку модели';
+    }
+
+    canvas.addEventListener('click', (e) => {
+      if (!measureMode || models.length === 0) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((e.clientX-rect.left)/rect.width)*2-1,
+        -((e.clientY-rect.top)/rect.height)*2+1
+      );
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(getAllMeshes(), true);
+      if (hits.length === 0) return;
+      const point = hits[0].point.clone();
+      if (measurePoints.length === 0) {
+        measurePoints.push(point);
+        const geo = new THREE.SphereGeometry(lastModelSize*0.015, 12, 12);
+        const sphere = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xe74c3c }));
+        sphere.position.copy(point);
+        scene.add(sphere);
+        measureMarkers.push(sphere);
+        document.getElementById('action-hint').textContent = 'Кликни на вторую точку модели';
+      } else if (measurePoints.length === 1) {
+        measurePoints.push(point);
+        const geo = new THREE.SphereGeometry(lastModelSize*0.015, 12, 12);
+        const sphere = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xe74c3c }));
+        sphere.position.copy(point);
+        scene.add(sphere);
+        measureMarkers.push(sphere);
+        measureLine = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(measurePoints),
+          new THREE.LineBasicMaterial({ color: 0xe74c3c })
+        );
+        scene.add(measureLine);
+        const dist = measurePoints[0].distanceTo(measurePoints[1]);
+        const label = dist>=1000 ? (dist/1000).toFixed(2)+' м' : dist>=10 ? (dist/10).toFixed(2)+' см' : dist.toFixed(2)+' мм';
+        const res = document.getElementById('measure-result');
+        res.textContent = 'Расстояние: ' + label;
+        res.style.display = 'block';
+        document.getElementById('clear-measure-btn').style.display = 'inline-block';
+        document.getElementById('action-hint').style.display = 'none';
+        measureMode = false;
+        controls.enabled = true;
+        document.getElementById('measure-btn').classList.remove('active');
+        document.getElementById('measure-btn').textContent = 'Измерить';
+      }
+    });
+
+    // --- Зум ---
+
+    function zoomIn() {
+      const dir = new THREE.Vector3();
+      dir.subVectors(controls.target, camera.position).normalize();
+      camera.position.addScaledVector(dir, lastModelSize * 0.2);
+      controls.update();
+    }
+
+    function zoomOut() {
+      const dir = new THREE.Vector3();
+      dir.subVectors(controls.target, camera.position).normalize();
+      camera.position.addScaledVector(dir, -lastModelSize * 0.2);
+      controls.update();
+    }
+
+    function resetZoom() { fitAllModels(); }
+
+    // --- Загрузка ---
+
+    function onModelLoaded(obj, filename) {
+      const color = MODEL_COLORS[models.length % MODEL_COLORS.length];
+      const id = nextId++;
+      const box = new THREE.Box3().setFromObject(obj);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      obj.position.sub(center);
+      if (models.length > 0) obj.position.x += models.length * size.x * 1.3;
+      const basePosition = obj.position.clone();
+      applyMaterial(obj, color, clipActive ? clipPlanes : []);
+      scene.add(obj);
+      models.push({ id, obj, name: filename, color, basePosition, offset: {x:0,y:0,z:0} });
+      selectedModelId = id;
+      document.getElementById('color-picker').value = color;
+      document.getElementById('export-name').value = filename.replace(/\.[^.]+$/, '');
+      const maxDim = Math.max(size.x, size.y, size.z);
+      lastModelSize = maxDim;
+      updateGrid(maxDim);
+      updateRuler(maxDim);
+      updateDimensions(obj);
+      renderModelList();
+      fitAllModels();
+      loading.style.display = 'none';
+      status.textContent = filename;
+      document.getElementById('model-list-panel').classList.add('visible');
+    }
+
+    document.getElementById('file-input').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      e.target.value = '';
+      const ext = file.name.split('.').pop().toLowerCase();
+      status.textContent = 'Загружаю ' + file.name + '...';
+      loading.style.display = 'block';
+      try {
+        if (ext === 'stl') {
+          const geometry = new THREE.STLLoader().parse(await file.arrayBuffer());
+          onModelLoaded(new THREE.Mesh(geometry, new THREE.MeshStandardMaterial()), file.name);
+          return;
+        }
+        if (ext === 'obj') { onModelLoaded(new THREE.OBJLoader().parse(await file.text()), file.name); return; }
+        if (ext === 'fbx') { onModelLoaded(new THREE.FBXLoader().parse(await file.arrayBuffer(), ''), file.name); return; }
+        if (ext === 'glb' || ext === 'gltf') {
+          new THREE.GLTFLoader().load(URL.createObjectURL(file), (gltf) => onModelLoaded(gltf.scene, file.name));
+          return;
+        }
+        const formData = new FormData();
+        formData.append('model', file);
+        const response = await fetch('/convert', { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Ошибка сервера');
+        new THREE.GLTFLoader().load(URL.createObjectURL(await response.blob()), (gltf) => onModelLoaded(gltf.scene, file.name));
+      } catch (err) {
+        loading.style.display = 'none';
+        status.textContent = 'Ошибка: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
