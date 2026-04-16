@@ -496,26 +496,40 @@
     // --- Подсчёт объёма по методу знакового объёма тетраэдра ---
     function computeVolumeCm3(obj) {
       let totalVolumeMm3 = 0;
+      let meshCount = 0;
+
+      // Обновляем мировые матрицы
+      obj.updateMatrixWorld(true);
+
       obj.traverse((child) => {
         if (!child.isMesh) return;
-        const geo = child.geometry.clone();
-        // Применяем мировую матрицу (учитываем масштаб и позицию)
-        geo.applyMatrix4(child.matrixWorld);
-        if (!geo.index) geo = geo.toNonIndexed ? geo.toNonIndexed() : geo;
+        meshCount++;
+
+        // Получаем геометрию и применяем мировую матрицу
+        let geo = child.geometry;
+        if (!geo || !geo.attributes.position) return;
+
+        // Индексированная геометрия — разворачиваем
+        if (geo.index) {
+          geo = geo.toNonIndexed();
+        }
 
         const pos = geo.attributes.position;
-        if (!pos) return;
+        const matrix = child.matrixWorld;
 
-        // Метод знакового объёма тетраэдра (Signed Volume of Tetrahedron)
         for (let i = 0; i < pos.count; i += 3) {
-          const ax = pos.getX(i),   ay = pos.getY(i),   az = pos.getZ(i);
-          const bx = pos.getX(i+1), by = pos.getY(i+1), bz = pos.getZ(i+1);
-          const cx = pos.getX(i+2), cy = pos.getY(i+2), cz = pos.getZ(i+2);
-          // Объём тетраэдра от начала координат до треугольника
-          totalVolumeMm3 += (ax*(by*cz - bz*cy) + bx*(cy*az - cz*ay) + cx*(ay*bz - az*by)) / 6.0;
+          const a = new THREE.Vector3(pos.getX(i),   pos.getY(i),   pos.getZ(i)).applyMatrix4(matrix);
+          const b = new THREE.Vector3(pos.getX(i+1), pos.getY(i+1), pos.getZ(i+1)).applyMatrix4(matrix);
+          const c = new THREE.Vector3(pos.getX(i+2), pos.getY(i+2), pos.getZ(i+2)).applyMatrix4(matrix);
+          totalVolumeMm3 += (
+            a.x * (b.y * c.z - b.z * c.y) +
+            b.x * (c.y * a.z - c.z * a.y) +
+            c.x * (a.y * b.z - a.z * b.y)
+          ) / 6.0;
         }
       });
-      // 1 мм³ = 0.001 см³
+
+      if (meshCount === 0) throw new Error('Нет меш-объектов');
       return Math.abs(totalVolumeMm3) / 1000;
     }
 
