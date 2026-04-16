@@ -46,38 +46,27 @@
     canvas { width: 100%; height: calc(100vh - 82px); display: block; }
 
     #loading {
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       background: rgba(0,0,0,0.75);
-      padding: 20px 32px;
-      border-radius: 10px;
-      font-size: 15px;
-      display: none;
+      padding: 20px 32px; border-radius: 10px;
+      font-size: 15px; display: none;
     }
 
     #action-hint {
-      position: absolute;
-      top: 100px;
-      left: 50%;
+      position: absolute; top: 100px; left: 50%;
       transform: translateX(-50%);
-      padding: 8px 20px;
-      border-radius: 8px;
-      font-size: 13px;
-      display: none;
-      pointer-events: none;
+      padding: 8px 20px; border-radius: 8px;
+      font-size: 13px; display: none; pointer-events: none;
     }
     #action-hint.measure { background: rgba(192,57,43,0.85); }
     #action-hint.move    { background: rgba(230,126,34,0.85); }
 
     #snap-cursor { display: none !important; }
-    
+
     #model-list-panel {
-      position: absolute;
-      left: 16px; top: 90px;
-      background: rgba(0,0,0,0.75);
-      border-radius: 8px; padding: 10px;
+      position: absolute; left: 16px; top: 90px;
+      background: rgba(0,0,0,0.75); border-radius: 8px; padding: 10px;
       min-width: 200px; max-width: 260px;
       display: none; flex-direction: column; gap: 6px;
       max-height: 40vh; overflow-y: auto;
@@ -101,10 +90,8 @@
     #model-list-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
 
     #measure-list-panel {
-      position: absolute;
-      left: 16px; bottom: 20px;
-      background: rgba(0,0,0,0.75);
-      border-radius: 8px; padding: 10px;
+      position: absolute; left: 16px; bottom: 20px;
+      background: rgba(0,0,0,0.75); border-radius: 8px; padding: 10px;
       min-width: 220px; max-width: 280px;
       display: none; flex-direction: column; gap: 6px;
       max-height: 40vh; overflow-y: auto;
@@ -114,8 +101,7 @@
     .measure-item {
       display: flex; align-items: center; gap: 6px;
       padding: 5px 8px; border-radius: 6px;
-      background: rgba(231,76,60,0.15);
-      font-size: 12px;
+      background: rgba(231,76,60,0.15); font-size: 12px;
       border: 1px solid rgba(231,76,60,0.3);
     }
     .measure-item-label { flex: 1; color: #e74c3c; }
@@ -125,11 +111,47 @@
     #measure-list-actions { display: flex; gap: 6px; margin-top: 4px; }
     #measure-list-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
 
+    /* Панель объёма */
+    #volume-panel {
+      position: absolute; left: 16px; bottom: 20px;
+      background: rgba(0,0,0,0.75); border-radius: 8px; padding: 14px 16px;
+      display: none; flex-direction: column; gap: 10px; min-width: 220px;
+    }
+    #volume-panel.visible { display: flex; }
+    #volume-title { font-size: 11px; color: #aaa; }
+    #volume-result {
+      font-size: 22px; font-weight: 500; color: #1D9E75; text-align: center;
+    }
+    #volume-sub { font-size: 11px; color: #555; text-align: center; }
+    #volume-info { font-size: 11px; color: #7a9cc0; line-height: 1.6; }
+    #volume-calc-btn { width: 100%; }
+
+    /* Панель масштаба */
+    #scale-panel {
+      position: absolute; left: 16px; bottom: 20px;
+      background: rgba(0,0,0,0.75); border-radius: 8px; padding: 12px 14px;
+      display: none; flex-direction: column; gap: 10px; min-width: 230px;
+    }
+    #scale-panel.visible { display: flex; }
+    #scale-title { font-size: 11px; color: #aaa; }
+    .scale-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .scale-row label { width: 56px; color: #aaa; flex-shrink: 0; }
+    .scale-input {
+      flex: 1; background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px; color: white; font-size: 12px; padding: 5px 8px;
+    }
+    .scale-input:focus { outline: none; border-color: #533483; }
+    .scale-unit { font-size: 11px; color: #7a9cc0; width: 20px; }
+    .scale-lock-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa; }
+    .scale-lock-row input[type=checkbox] { width: 14px; height: 14px; cursor: pointer; }
+    #scale-current { font-size: 11px; color: #555; }
+    #scale-actions { display: flex; gap: 6px; }
+    #scale-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
+
     #export-panel {
-      position: absolute;
-      right: 20px; bottom: 120px;
-      background: rgba(0,0,0,0.75);
-      border-radius: 8px; padding: 10px 14px;
+      position: absolute; right: 20px; bottom: 120px;
+      background: rgba(0,0,0,0.75); border-radius: 8px; padding: 10px 14px;
       display: none; flex-direction: column; gap: 8px; min-width: 160px;
     }
     #export-panel.visible { display: flex; }
@@ -137,22 +159,18 @@
     #export-name {
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 5px; color: white; font-size: 12px;
-      padding: 5px 8px; width: 100%;
+      border-radius: 5px; color: white; font-size: 12px; padding: 5px 8px; width: 100%;
     }
     .export-btn {
       background: #0f3460; color: white; border: none;
-      padding: 7px 10px; border-radius: 6px;
-      cursor: pointer; font-size: 12px; text-align: left;
+      padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; text-align: left;
     }
     .export-btn:hover { background: #533483; }
     .export-btn span { color: #7a9cc0; font-size: 11px; margin-left: 4px; }
 
     #move-panel {
-      position: absolute;
-      left: 16px; bottom: 20px;
-      background: rgba(0,0,0,0.75);
-      border-radius: 8px; padding: 10px 14px;
+      position: absolute; left: 16px; bottom: 20px;
+      background: rgba(0,0,0,0.75); border-radius: 8px; padding: 10px 14px;
       display: none; flex-direction: column; gap: 8px; min-width: 180px;
     }
     #move-panel.visible { display: flex; }
@@ -163,10 +181,8 @@
     .move-row span { width: 52px; text-align: right; font-size: 11px; color: #7a9cc0; }
 
     #clip-panel {
-      position: absolute;
-      left: 16px; bottom: 20px;
-      background: rgba(0,0,0,0.7);
-      border-radius: 8px; padding: 12px 16px;
+      position: absolute; left: 16px; bottom: 20px;
+      background: rgba(0,0,0,0.7); border-radius: 8px; padding: 12px 16px;
       display: none; flex-direction: column; gap: 10px; min-width: 220px;
     }
     #clip-panel.visible { display: flex; }
@@ -182,11 +198,10 @@
       display: flex; flex-direction: column; gap: 8px;
     }
     .zoom-btn {
-      width: 44px; height: 44px;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 8px; color: white; font-size: 22px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px; background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+      color: white; font-size: 22px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
       user-select: none; -webkit-user-select: none;
     }
     .zoom-btn:active { background: rgba(83,52,131,0.8); }
@@ -227,6 +242,10 @@
     <div class="sep"></div>
     <button class="btn" id="move-btn" onclick="toggleMove()">Переместить</button>
     <div class="sep"></div>
+    <button class="btn" id="scale-btn" onclick="toggleScale()">Масштаб</button>
+    <div class="sep"></div>
+    <button class="btn" id="volume-btn" onclick="toggleVolume()">Объём</button>
+    <div class="sep"></div>
     <button class="btn" id="measure-btn" onclick="toggleMeasure()">Измерить</button>
     <button class="btn" id="measures-list-btn" onclick="toggleMeasureList()" style="display:none">Измерения (0)</button>
     <div class="sep"></div>
@@ -248,6 +267,7 @@
     <span id="dim-x">Ширина: —</span>
     <span id="dim-y">Высота: —</span>
     <span id="dim-z">Глубина: —</span>
+    <span id="info-volume" style="color:#1D9E75; display:none"></span>
   </div>
 
   <canvas id="canvas"></canvas>
@@ -269,6 +289,49 @@
     <div id="measure-list"></div>
     <div id="measure-list-actions">
       <button class="btn" onclick="clearAllMeasurements()">Удалить все</button>
+    </div>
+  </div>
+
+  <!-- Панель объёма -->
+  <div id="volume-panel">
+    <div id="volume-title">Объём выбранной модели</div>
+    <div id="volume-result">—</div>
+    <div id="volume-sub">см³</div>
+    <div id="volume-info"></div>
+    <button class="btn" id="volume-calc-btn" onclick="calculateVolume()">Рассчитать</button>
+  </div>
+
+  <!-- Панель масштаба -->
+  <div id="scale-panel">
+    <div id="scale-title">Масштаб выбранной модели</div>
+    <div id="scale-current">Текущий размер: —</div>
+    <div class="scale-row">
+      <label>Ширина X</label>
+      <input type="number" class="scale-input" id="scale-x" min="0.001" step="0.1" placeholder="мм">
+      <span class="scale-unit">мм</span>
+    </div>
+    <div class="scale-row">
+      <label>Высота Y</label>
+      <input type="number" class="scale-input" id="scale-y" min="0.001" step="0.1" placeholder="мм">
+      <span class="scale-unit">мм</span>
+    </div>
+    <div class="scale-row">
+      <label>Глубина Z</label>
+      <input type="number" class="scale-input" id="scale-z" min="0.001" step="0.1" placeholder="мм">
+      <span class="scale-unit">мм</span>
+    </div>
+    <div class="scale-lock-row">
+      <input type="checkbox" id="scale-lock" checked>
+      <label for="scale-lock">Сохранять пропорции</label>
+    </div>
+    <div class="scale-row">
+      <label>Коэффициент</label>
+      <input type="number" class="scale-input" id="scale-factor" min="0.001" step="0.1" placeholder="1.0">
+      <span class="scale-unit">×</span>
+    </div>
+    <div id="scale-actions">
+      <button class="btn" onclick="applyScale()">Применить</button>
+      <button class="btn" onclick="resetScale()">Сбросить</button>
     </div>
   </div>
 
@@ -347,7 +410,6 @@
     const canvas = document.getElementById('canvas');
     const status = document.getElementById('status');
     const loading = document.getElementById('loading');
-    const snapCursor = document.getElementById('snap-cursor');
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x1a1a2e);
@@ -372,72 +434,56 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
 
-    let grid = null;
-    let lastModelSize = 100;
-    let isLight = false;
-    let clipActive = false;
-    let moveMode = false;
-    let measureMode = false;
-    let measureFirstPoint = null;
-
-    // Для отличия клика от перетаскивания
-    let pointerDownPos = { x: 0, y: 0 };
-    const CLICK_THRESHOLD = 5; // пикселей
+    let grid = null, lastModelSize = 100, isLight = false, clipActive = false;
+    let moveMode = false, measureMode = false, measureFirstPoint = null;
+    let pointerDownPos = { x:0, y:0 };
+    const CLICK_THRESHOLD = 5;
 
     const models = [];
-    let selectedModelId = null;
-    let nextId = 1;
-
+    let selectedModelId = null, nextId = 1;
     const measurements = [];
     let measNextId = 1;
 
-    const MODEL_COLORS = [
-      '#1D9E75','#7F77DD','#D85A30','#378ADD',
-      '#639922','#D4537E','#BA7517','#E24B4A'
-    ];
+    const MODEL_COLORS = ['#1D9E75','#7F77DD','#D85A30','#378ADD','#639922','#D4537E','#BA7517','#E24B4A'];
 
     const clipPlanes = [
-      new THREE.Plane(new THREE.Vector3(-1, 0, 0), Infinity),
-      new THREE.Plane(new THREE.Vector3(0, -1, 0), Infinity),
-      new THREE.Plane(new THREE.Vector3(0, 0, -1), Infinity),
+      new THREE.Plane(new THREE.Vector3(-1,0,0), Infinity),
+      new THREE.Plane(new THREE.Vector3(0,-1,0), Infinity),
+      new THREE.Plane(new THREE.Vector3(0,0,-1), Infinity),
     ];
 
     const raycaster = new THREE.Raycaster();
     let isDragging = false, dragStart = new THREE.Vector2(), dragPlane = new THREE.Plane();
 
     const snapMarker = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 8, 8),
+      new THREE.SphereGeometry(1,8,8),
       new THREE.MeshBasicMaterial({ color: 0xe74c3c })
     );
     snapMarker.visible = false;
     scene.add(snapMarker);
 
-    function getMarkerSize() {
-      const dist = camera.position.distanceTo(controls.target);
-      return dist * 0.008;
-    }
+    function getMarkerSize() { return camera.position.distanceTo(controls.target) * 0.008; }
 
     function updateGrid(modelSize) {
       if (grid) scene.remove(grid);
-      const fieldSize = Math.max(modelSize * 3, 100);
-      const cells = Math.round(fieldSize / 10);
+      const fieldSize = Math.max(modelSize*3, 100);
+      const cells = Math.round(fieldSize/10);
       grid = new THREE.GridHelper(fieldSize, cells, 0x444466, 0x333355);
       scene.add(grid);
     }
 
     function updateRuler(modelSize) {
-      const rawValue = modelSize / 2;
+      const rawValue = modelSize/2;
       const magnitude = Math.pow(10, Math.floor(Math.log10(rawValue)));
       const nice = [1,2,5,10,20,50,100,200,500].map(v=>v*magnitude).find(v=>v>=rawValue)||magnitude*1000;
-      let label = nice>=1000?(nice/1000).toFixed(0)+' м':nice>=10?(nice/10).toFixed(1)+' см':nice.toFixed(0)+' мм';
-      document.getElementById('ruler-label').textContent = label;
+      document.getElementById('ruler-label').textContent =
+        nice>=1000?(nice/1000).toFixed(0)+' м':nice>=10?(nice/10).toFixed(1)+' см':nice.toFixed(0)+' мм';
     }
 
     function updateDimensions(obj) {
       if (!obj) {
-        ['dim-x','dim-y','dim-z'].forEach((id,i)=>{
-          document.getElementById(id).textContent=['Ширина','Высота','Глубина'][i]+': —';
-        });
+        ['dim-x','dim-y','dim-z'].forEach((id,i)=>{ document.getElementById(id).textContent=['Ширина','Высота','Глубина'][i]+': —'; });
+        document.getElementById('info-volume').style.display = 'none';
         return;
       }
       const box = new THREE.Box3().setFromObject(obj);
@@ -447,27 +493,111 @@
       document.getElementById('dim-z').textContent='Глубина: '+size.z.toFixed(1)+' мм';
     }
 
+    // --- Подсчёт объёма по методу знакового объёма тетраэдра ---
+    function computeVolumeCm3(obj) {
+      let totalVolumeMm3 = 0;
+      obj.traverse((child) => {
+        if (!child.isMesh) return;
+        const geo = child.geometry.clone();
+        // Применяем мировую матрицу (учитываем масштаб и позицию)
+        geo.applyMatrix4(child.matrixWorld);
+        if (!geo.index) geo = geo.toNonIndexed ? geo.toNonIndexed() : geo;
+
+        const pos = geo.attributes.position;
+        if (!pos) return;
+
+        // Метод знакового объёма тетраэдра (Signed Volume of Tetrahedron)
+        for (let i = 0; i < pos.count; i += 3) {
+          const ax = pos.getX(i),   ay = pos.getY(i),   az = pos.getZ(i);
+          const bx = pos.getX(i+1), by = pos.getY(i+1), bz = pos.getZ(i+1);
+          const cx = pos.getX(i+2), cy = pos.getY(i+2), cz = pos.getZ(i+2);
+          // Объём тетраэдра от начала координат до треугольника
+          totalVolumeMm3 += (ax*(by*cz - bz*cy) + bx*(cy*az - cz*ay) + cx*(ay*bz - az*by)) / 6.0;
+        }
+      });
+      // 1 мм³ = 0.001 см³
+      return Math.abs(totalVolumeMm3) / 1000;
+    }
+
+    function toggleVolume() {
+      const panel = document.getElementById('volume-panel');
+      const btn = document.getElementById('volume-btn');
+      const isVisible = panel.classList.contains('visible');
+      closeAllBottomPanels();
+      if (!isVisible) {
+        panel.classList.add('visible');
+        btn.classList.add('active');
+        // Считаем автоматически если модель загружена
+        const m = getSelectedModel();
+        if (m) calculateVolume();
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+
+    function calculateVolume() {
+      const m = getSelectedModel();
+      if (!m) {
+        document.getElementById('volume-result').textContent = '—';
+        document.getElementById('volume-info').textContent = 'Сначала выбери модель';
+        return;
+      }
+
+      document.getElementById('volume-result').textContent = '...';
+      document.getElementById('volume-info').textContent = 'Считаю...';
+
+      // Небольшая задержка чтобы UI обновился
+      setTimeout(() => {
+        try {
+          const volumeCm3 = computeVolumeCm3(m.obj);
+          document.getElementById('volume-result').textContent = volumeCm3.toFixed(3);
+          document.getElementById('volume-sub').textContent = 'см³';
+
+          // Дополнительная информация
+          const box = new THREE.Box3().setFromObject(m.obj);
+          const size = box.getSize(new THREE.Vector3());
+          const bboxVolume = (size.x * size.y * size.z) / 1000;
+          const fillPercent = (volumeCm3 / bboxVolume * 100).toFixed(1);
+
+          document.getElementById('volume-info').textContent =
+            'Габаритный объём: ' + bboxVolume.toFixed(3) + ' см³\n' +
+            'Заполнение: ' + fillPercent + '%';
+
+          // Показываем в инфобаре
+          const infoVol = document.getElementById('info-volume');
+          infoVol.textContent = 'Объём: ' + volumeCm3.toFixed(3) + ' см³';
+          infoVol.style.display = 'inline';
+
+        } catch(e) {
+          document.getElementById('volume-result').textContent = '—';
+          document.getElementById('volume-info').textContent = 'Ошибка расчёта. Модель может быть не замкнутой.';
+        }
+      }, 50);
+    }
+
+    function closeAllBottomPanels() {
+      ['scale-panel','move-panel','clip-panel','measure-list-panel','volume-panel'].forEach(id => {
+        document.getElementById(id).classList.remove('visible');
+      });
+      document.getElementById('scale-btn').classList.remove('active');
+      document.getElementById('volume-btn').classList.remove('active');
+    }
+
     updateGrid(100);
 
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
       if (snapMarker.visible) snapMarker.scale.setScalar(getMarkerSize());
-      measurements.forEach(m => {
-        const s = getMarkerSize();
-        m.markers.forEach(mk => mk.scale.setScalar(s));
-      });
-      // Обновляем незавершённую первую точку
-      if (measureFirstPoint) {
-        measureFirstPoint.marker.scale.setScalar(getMarkerSize());
-      }
+      measurements.forEach(m => { const s = getMarkerSize(); m.markers.forEach(mk => mk.scale.setScalar(s)); });
+      if (measureFirstPoint) measureFirstPoint.marker.scale.setScalar(getMarkerSize());
       renderer.render(scene, camera);
     }
     animate();
 
     window.addEventListener('resize', () => {
-      renderer.setSize(innerWidth, innerHeight - 82);
-      camera.aspect = innerWidth / (innerHeight - 82);
+      renderer.setSize(innerWidth, innerHeight-82);
+      camera.aspect = innerWidth/(innerHeight-82);
       camera.updateProjectionMatrix();
     });
 
@@ -493,8 +623,8 @@
     function getMouseNDC(e) {
       const rect = canvas.getBoundingClientRect();
       return new THREE.Vector2(
-        ((e.clientX - rect.left) / rect.width) * 2 - 1,
-        -((e.clientY - rect.top) / rect.height) * 2 + 1
+        ((e.clientX-rect.left)/rect.width)*2-1,
+        -((e.clientY-rect.top)/rect.height)*2+1
       );
     }
 
@@ -505,16 +635,16 @@
       list.innerHTML = '';
       models.forEach(m => {
         const item = document.createElement('div');
-        item.className = 'model-item' + (m.id === selectedModelId ? ' selected' : '');
+        item.className = 'model-item'+(m.id===selectedModelId?' selected':'');
         item.innerHTML = `
           <div class="model-item-color" style="background:${m.color}"></div>
           <span class="model-item-name" title="${m.name}">${m.name}</span>
           <button class="model-item-del" onclick="removeModel(${m.id},event)">✕</button>
         `;
-        item.addEventListener('click', () => selectModel(m.id));
+        item.addEventListener('click', ()=>selectModel(m.id));
         list.appendChild(item);
       });
-      document.getElementById('models-btn').textContent = `Модели (${models.length})`;
+      document.getElementById('models-btn').textContent=`Модели (${models.length})`;
     }
 
     function toggleModelList() { document.getElementById('model-list-panel').classList.toggle('visible'); }
@@ -530,74 +660,148 @@
         lastModelSize = Math.max(size.x, size.y, size.z);
         updateRuler(lastModelSize);
         syncMoveSliders(m);
-        document.getElementById('export-name').value = m.name.replace(/\.[^.]+$/, '');
+        document.getElementById('export-name').value = m.name.replace(/\.[^.]+$/,'');
+        updateScalePanel(m);
+        // Пересчитываем объём если панель открыта
+        if (document.getElementById('volume-panel').classList.contains('visible')) calculateVolume();
       }
       renderModelList();
     }
 
     function removeModel(id, e) {
       if (e) e.stopPropagation();
-      const idx = models.findIndex(x => x.id === id);
-      if (idx === -1) return;
+      const idx = models.findIndex(x=>x.id===id);
+      if (idx===-1) return;
       scene.remove(models[idx].obj);
-      models.splice(idx, 1);
-      if (selectedModelId === id) {
-        selectedModelId = models.length > 0 ? models[models.length-1].id : null;
+      models.splice(idx,1);
+      if (selectedModelId===id) {
+        selectedModelId = models.length>0?models[models.length-1].id:null;
         if (selectedModelId) selectModel(selectedModelId); else updateDimensions(null);
       }
       renderModelList();
-      if (models.length === 0) status.textContent = 'Файл не загружен';
+      if (models.length===0) status.textContent='Файл не загружен';
     }
 
     function removeAllModels() {
-      models.forEach(m => scene.remove(m.obj));
-      models.length = 0;
-      selectedModelId = null;
-      updateDimensions(null);
-      renderModelList();
-      status.textContent = 'Файл не загружен';
+      models.forEach(m=>scene.remove(m.obj));
+      models.length=0; selectedModelId=null;
+      updateDimensions(null); renderModelList();
+      status.textContent='Файл не загружен';
     }
 
     function fitAllModels() {
-      if (models.length === 0) return;
+      if (models.length===0) return;
       const box = new THREE.Box3();
-      models.forEach(m => box.expandByObject(m.obj));
+      models.forEach(m=>box.expandByObject(m.obj));
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
+      const maxDim = Math.max(size.x,size.y,size.z);
       lastModelSize = maxDim;
       camera.position.set(center.x+maxDim*1.5, center.y+maxDim, center.z+maxDim*2);
-      camera.lookAt(center);
-      controls.target.copy(center);
-      controls.update();
-      updateGrid(maxDim);
-      updateRuler(maxDim);
+      camera.lookAt(center); controls.target.copy(center); controls.update();
+      updateGrid(maxDim); updateRuler(maxDim);
     }
 
     function setView(view) {
-      const d = lastModelSize * 2.5;
+      const d = lastModelSize*2.5;
       if (view==='front') camera.position.set(0,0,d);
       else if (view==='side') camera.position.set(d,0,0);
       else if (view==='top') camera.position.set(0,d,0);
       else if (view==='iso') camera.position.set(d,d*0.7,d);
-      camera.lookAt(0,0,0);
-      controls.target.set(0,0,0);
-      controls.update();
+      camera.lookAt(0,0,0); controls.target.set(0,0,0); controls.update();
     }
 
     function changeColor(hex) {
-      const m = getSelectedModel();
-      if (!m) return;
+      const m = getSelectedModel(); if (!m) return;
       m.color = hex;
-      applyMaterial(m.obj, hex, clipActive ? clipPlanes : []);
+      applyMaterial(m.obj, hex, clipActive?clipPlanes:[]);
       renderModelList();
     }
 
     function toggleTheme() {
       isLight = !isLight;
       document.body.classList.toggle('light', isLight);
-      scene.background = new THREE.Color(isLight ? 0xf0f0f0 : 0x1a1a2e);
-      document.getElementById('theme-btn').textContent = isLight ? 'Тёмная тема' : 'Светлая тема';
+      scene.background = new THREE.Color(isLight?0xf0f0f0:0x1a1a2e);
+      document.getElementById('theme-btn').textContent = isLight?'Тёмная тема':'Светлая тема';
+    }
+
+    // --- Масштабирование ---
+
+    function toggleScale() {
+      const panel = document.getElementById('scale-panel');
+      const btn = document.getElementById('scale-btn');
+      const isVisible = panel.classList.contains('visible');
+      closeAllBottomPanels();
+      if (!isVisible) {
+        panel.classList.add('visible');
+        btn.classList.add('active');
+        const m = getSelectedModel();
+        if (m) updateScalePanel(m);
+      }
+    }
+
+    function updateScalePanel(m) {
+      const box = new THREE.Box3().setFromObject(m.obj);
+      const size = box.getSize(new THREE.Vector3());
+      document.getElementById('scale-x').value = size.x.toFixed(2);
+      document.getElementById('scale-y').value = size.y.toFixed(2);
+      document.getElementById('scale-z').value = size.z.toFixed(2);
+      document.getElementById('scale-factor').value = '1.0';
+      document.getElementById('scale-current').textContent =
+        'Текущий: '+size.x.toFixed(1)+' × '+size.y.toFixed(1)+' × '+size.z.toFixed(1)+' мм';
+    }
+
+    function onScaleInputChange(axis) {
+      const m = getSelectedModel(); if (!m) return;
+      if (!document.getElementById('scale-lock').checked) return;
+      const box = new THREE.Box3().setFromObject(m.obj);
+      const origSize = box.getSize(new THREE.Vector3());
+      const newVal = parseFloat(document.getElementById('scale-'+axis).value);
+      if (!newVal||newVal<=0) return;
+      const origVal = axis==='x'?origSize.x:axis==='y'?origSize.y:origSize.z;
+      const factor = newVal/origVal;
+      if (axis!=='x') document.getElementById('scale-x').value=(origSize.x*factor).toFixed(2);
+      if (axis!=='y') document.getElementById('scale-y').value=(origSize.y*factor).toFixed(2);
+      if (axis!=='z') document.getElementById('scale-z').value=(origSize.z*factor).toFixed(2);
+      document.getElementById('scale-factor').value=factor.toFixed(4);
+    }
+
+    function onScaleFactorChange() {
+      const m = getSelectedModel(); if (!m) return;
+      const factor = parseFloat(document.getElementById('scale-factor').value);
+      if (!factor||factor<=0) return;
+      const box = new THREE.Box3().setFromObject(m.obj);
+      const origSize = box.getSize(new THREE.Vector3());
+      document.getElementById('scale-x').value=(origSize.x*factor).toFixed(2);
+      document.getElementById('scale-y').value=(origSize.y*factor).toFixed(2);
+      document.getElementById('scale-z').value=(origSize.z*factor).toFixed(2);
+    }
+
+    function applyScale() {
+      const m = getSelectedModel(); if (!m) return;
+      const box = new THREE.Box3().setFromObject(m.obj);
+      const origSize = box.getSize(new THREE.Vector3());
+      const newX = parseFloat(document.getElementById('scale-x').value);
+      const newY = parseFloat(document.getElementById('scale-y').value);
+      const newZ = parseFloat(document.getElementById('scale-z').value);
+      if (!newX||!newY||!newZ||newX<=0||newY<=0||newZ<=0) { alert('Введите корректные размеры больше нуля'); return; }
+      m.obj.scale.set(m.obj.scale.x*(newX/origSize.x), m.obj.scale.y*(newY/origSize.y), m.obj.scale.z*(newZ/origSize.z));
+      m.basePosition = m.obj.position.clone();
+      updateDimensions(m.obj); updateScalePanel(m); fitAllModels();
+      // Сбрасываем объём при изменении масштаба
+      document.getElementById('volume-result').textContent='—';
+      document.getElementById('info-volume').style.display='none';
+    }
+
+    function resetScale() {
+      const m = getSelectedModel(); if (!m) return;
+      m.obj.scale.set(1,1,1);
+      const box = new THREE.Box3().setFromObject(m.obj);
+      const center = box.getCenter(new THREE.Vector3());
+      m.obj.position.sub(center); m.basePosition=m.obj.position.clone(); m.offset={x:0,y:0,z:0};
+      updateDimensions(m.obj); updateScalePanel(m); fitAllModels();
+      document.getElementById('volume-result').textContent='—';
+      document.getElementById('info-volume').style.display='none';
     }
 
     // --- Экспорт ---
@@ -607,22 +811,20 @@
     function downloadBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
+      a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
     }
 
     function exportModel(format) {
-      const m = getSelectedModel();
-      if (!m) { alert('Сначала выбери модель в списке'); return; }
-      const name = document.getElementById('export-name').value.trim() || 'model';
-      if (format === 'stl') {
-        downloadBlob(new Blob([new THREE.STLExporter().parse(m.obj, { binary: true })], { type: 'application/octet-stream' }), name+'.stl');
-      } else if (format === 'obj') {
-        downloadBlob(new Blob([new THREE.OBJExporter().parse(m.obj)], { type: 'text/plain' }), name+'.obj');
-      } else if (format === 'glb') {
-        new THREE.GLTFExporter().parse(m.obj, (result) => {
-          downloadBlob(new Blob([result], { type: 'application/octet-stream' }), name+'.glb');
-        }, { binary: true });
+      const m = getSelectedModel(); if (!m) { alert('Сначала выбери модель в списке'); return; }
+      const name = document.getElementById('export-name').value.trim()||'model';
+      if (format==='stl') {
+        downloadBlob(new Blob([new THREE.STLExporter().parse(m.obj,{binary:true})],{type:'application/octet-stream'}), name+'.stl');
+      } else if (format==='obj') {
+        downloadBlob(new Blob([new THREE.OBJExporter().parse(m.obj)],{type:'text/plain'}), name+'.obj');
+      } else if (format==='glb') {
+        new THREE.GLTFExporter().parse(m.obj,(result)=>{
+          downloadBlob(new Blob([result],{type:'application/octet-stream'}), name+'.glb');
+        },{binary:true});
       }
     }
 
@@ -635,378 +837,246 @@
       const hint = document.getElementById('action-hint');
       if (moveMode) {
         if (measureMode) toggleMeasure();
-        btn.classList.add('move-active');
-        btn.textContent = 'Перемещение вкл';
+        closeAllBottomPanels();
+        btn.classList.add('move-active'); btn.textContent='Перемещение вкл';
         panel.classList.add('visible');
-        hint.className = 'move';
-        hint.textContent = 'Выбери модель в списке и двигай слайдеры или тяни по экрану';
-        hint.style.display = 'block';
-        controls.enabled = false;
-        const m = getSelectedModel();
-        if (m) syncMoveSliders(m);
+        hint.className='move'; hint.textContent='Выбери модель в списке и двигай слайдеры или тяни по экрану';
+        hint.style.display='block'; controls.enabled=false;
+        const m = getSelectedModel(); if (m) syncMoveSliders(m);
       } else {
-        btn.classList.remove('move-active');
-        btn.textContent = 'Переместить';
-        panel.classList.remove('visible');
-        hint.style.display = 'none';
-        controls.enabled = true;
+        btn.classList.remove('move-active'); btn.textContent='Переместить';
+        panel.classList.remove('visible'); hint.style.display='none'; controls.enabled=true;
       }
     }
 
     function syncMoveSliders(m) {
-      const range = Math.max(lastModelSize * 5, 500);
-      ['x','y','z'].forEach(axis => {
-        const el = document.getElementById('move-' + axis);
-        el.min = -range; el.max = range;
-        const val = m.offset ? (m.offset[axis] || 0) : 0;
-        el.value = val;
-        document.getElementById('move-' + axis + '-val').textContent = val.toFixed(0) + ' мм';
+      const range = Math.max(lastModelSize*5, 500);
+      ['x','y','z'].forEach(axis=>{
+        const el = document.getElementById('move-'+axis);
+        el.min=-range; el.max=range;
+        const val = m.offset?(m.offset[axis]||0):0;
+        el.value=val; document.getElementById('move-'+axis+'-val').textContent=val.toFixed(0)+' мм';
       });
     }
 
     function applyMove() {
-      const m = getSelectedModel();
-      if (!m) return;
-      const x = parseFloat(document.getElementById('move-x').value);
-      const y = parseFloat(document.getElementById('move-y').value);
-      const z = parseFloat(document.getElementById('move-z').value);
-      m.offset = { x, y, z };
-      m.obj.position.set(
-        (m.basePosition ? m.basePosition.x : 0) + x,
-        (m.basePosition ? m.basePosition.y : 0) + y,
-        (m.basePosition ? m.basePosition.z : 0) + z
-      );
-      document.getElementById('move-x-val').textContent = x.toFixed(0) + ' мм';
-      document.getElementById('move-y-val').textContent = y.toFixed(0) + ' мм';
-      document.getElementById('move-z-val').textContent = z.toFixed(0) + ' мм';
+      const m = getSelectedModel(); if (!m) return;
+      const x=parseFloat(document.getElementById('move-x').value);
+      const y=parseFloat(document.getElementById('move-y').value);
+      const z=parseFloat(document.getElementById('move-z').value);
+      m.offset={x,y,z};
+      m.obj.position.set((m.basePosition?m.basePosition.x:0)+x,(m.basePosition?m.basePosition.y:0)+y,(m.basePosition?m.basePosition.z:0)+z);
+      document.getElementById('move-x-val').textContent=x.toFixed(0)+' мм';
+      document.getElementById('move-y-val').textContent=y.toFixed(0)+' мм';
+      document.getElementById('move-z-val').textContent=z.toFixed(0)+' мм';
     }
 
     function resetModelPosition() {
-      const m = getSelectedModel();
-      if (!m) return;
-      m.offset = { x:0, y:0, z:0 };
-      m.obj.position.set(
-        m.basePosition ? m.basePosition.x : 0,
-        m.basePosition ? m.basePosition.y : 0,
-        m.basePosition ? m.basePosition.z : 0
-      );
-      ['x','y','z'].forEach(axis => {
-        document.getElementById('move-'+axis).value = 0;
-        document.getElementById('move-'+axis+'-val').textContent = '0 мм';
-      });
+      const m = getSelectedModel(); if (!m) return;
+      m.offset={x:0,y:0,z:0};
+      m.obj.position.set(m.basePosition?m.basePosition.x:0,m.basePosition?m.basePosition.y:0,m.basePosition?m.basePosition.z:0);
+      ['x','y','z'].forEach(axis=>{ document.getElementById('move-'+axis).value=0; document.getElementById('move-'+axis+'-val').textContent='0 мм'; });
     }
 
-    // --- Обработчики мыши ---
-
-    canvas.addEventListener('pointerdown', (e) => {
-      pointerDownPos = { x: e.clientX, y: e.clientY };
-
+    canvas.addEventListener('pointerdown',(e)=>{
+      pointerDownPos={x:e.clientX,y:e.clientY};
       if (!moveMode) return;
-      const m = getSelectedModel();
-      if (!m) return;
-      isDragging = true;
+      const m = getSelectedModel(); if (!m) return;
+      isDragging=true;
       const box = new THREE.Box3().setFromObject(m.obj);
-      dragPlane.setFromNormalAndCoplanarPoint(
-        camera.getWorldDirection(new THREE.Vector3()).negate(),
-        box.getCenter(new THREE.Vector3())
-      );
-      dragStart.set(e.clientX, e.clientY);
-      e.preventDefault();
+      dragPlane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()).negate(),box.getCenter(new THREE.Vector3()));
+      dragStart.set(e.clientX,e.clientY); e.preventDefault();
     });
 
-    canvas.addEventListener('pointermove', (e) => {
-      // Снаппинг курсор в режиме измерения
-      if (measureMode && models.length > 0) {
-        raycaster.setFromCamera(getMouseNDC(e), camera);
-        const hits = raycaster.intersectObjects(getAllMeshes(), true);
-        if (hits.length > 0) {
-          snapMarker.position.copy(hits[0].point);
-          snapMarker.scale.setScalar(getMarkerSize());
-          snapMarker.visible = true;
-          snapCursor.style.display = 'block';
-          snapCursor.style.left = e.clientX + 'px';
-          snapCursor.style.top = (e.clientY - 82) + 'px';
-        } else {
-          snapMarker.visible = false;
-          snapCursor.style.display = 'none';
-        }
-      } else {
-        snapMarker.visible = false;
-        snapCursor.style.display = 'none';
-      }
+    canvas.addEventListener('pointermove',(e)=>{
+      if (measureMode&&models.length>0) {
+        raycaster.setFromCamera(getMouseNDC(e),camera);
+        const hits=raycaster.intersectObjects(getAllMeshes(),true);
+        if (hits.length>0) { snapMarker.position.copy(hits[0].point); snapMarker.scale.setScalar(getMarkerSize()); snapMarker.visible=true; }
+        else snapMarker.visible=false;
+      } else snapMarker.visible=false;
 
-      // Перетаскивание в режиме перемещения
-      if (!moveMode || !isDragging) return;
-      const m = getSelectedModel();
-      if (!m) return;
-      const rect = canvas.getBoundingClientRect();
-      const ndc = (cx, cy) => new THREE.Vector2(((cx-rect.left)/rect.width)*2-1,-((cy-rect.top)/rect.height)*2+1);
-      const r1 = new THREE.Raycaster(); r1.setFromCamera(ndc(dragStart.x, dragStart.y), camera);
-      const r2 = new THREE.Raycaster(); r2.setFromCamera(ndc(e.clientX, e.clientY), camera);
-      const p1 = new THREE.Vector3(), p2 = new THREE.Vector3();
-      r1.ray.intersectPlane(dragPlane, p1);
-      r2.ray.intersectPlane(dragPlane, p2);
-      if (p1 && p2) {
-        const delta = p2.clone().sub(p1);
-        const offset = m.offset || { x:0, y:0, z:0 };
-        m.offset = { x: offset.x+delta.x, y: offset.y+delta.y, z: offset.z+delta.z };
-        const base = m.basePosition || new THREE.Vector3();
-        m.obj.position.set(base.x+m.offset.x, base.y+m.offset.y, base.z+m.offset.z);
-        ['x','y','z'].forEach(axis => {
-          document.getElementById('move-'+axis).value = m.offset[axis].toFixed(0);
-          document.getElementById('move-'+axis+'-val').textContent = m.offset[axis].toFixed(0)+' мм';
-        });
+      if (!moveMode||!isDragging) return;
+      const m=getSelectedModel(); if (!m) return;
+      const rect=canvas.getBoundingClientRect();
+      const ndc=(cx,cy)=>new THREE.Vector2(((cx-rect.left)/rect.width)*2-1,-((cy-rect.top)/rect.height)*2+1);
+      const r1=new THREE.Raycaster(); r1.setFromCamera(ndc(dragStart.x,dragStart.y),camera);
+      const r2=new THREE.Raycaster(); r2.setFromCamera(ndc(e.clientX,e.clientY),camera);
+      const p1=new THREE.Vector3(),p2=new THREE.Vector3();
+      r1.ray.intersectPlane(dragPlane,p1); r2.ray.intersectPlane(dragPlane,p2);
+      if (p1&&p2) {
+        const delta=p2.clone().sub(p1); const offset=m.offset||{x:0,y:0,z:0};
+        m.offset={x:offset.x+delta.x,y:offset.y+delta.y,z:offset.z+delta.z};
+        const base=m.basePosition||new THREE.Vector3();
+        m.obj.position.set(base.x+m.offset.x,base.y+m.offset.y,base.z+m.offset.z);
+        ['x','y','z'].forEach(axis=>{ document.getElementById('move-'+axis).value=m.offset[axis].toFixed(0); document.getElementById('move-'+axis+'-val').textContent=m.offset[axis].toFixed(0)+' мм'; });
       }
-      dragStart.set(e.clientX, e.clientY);
-      e.preventDefault();
+      dragStart.set(e.clientX,e.clientY); e.preventDefault();
     });
 
-    canvas.addEventListener('pointerup', (e) => {
-      isDragging = false;
-
-      // Проверяем — это клик или перетаскивание?
-      if (!measureMode || models.length === 0) return;
-      const dx = Math.abs(e.clientX - pointerDownPos.x);
-      const dy = Math.abs(e.clientY - pointerDownPos.y);
-      if (dx > CLICK_THRESHOLD || dy > CLICK_THRESHOLD) return; // это было вращение — игнорируем
-
-      // Это клик — ставим точку
-      raycaster.setFromCamera(getMouseNDC(e), camera);
-      const hits = raycaster.intersectObjects(getAllMeshes(), true);
-      if (hits.length === 0) return;
-      const point = hits[0].point.clone();
-
+    canvas.addEventListener('pointerup',(e)=>{
+      isDragging=false;
+      if (!measureMode||models.length===0) return;
+      if (Math.abs(e.clientX-pointerDownPos.x)>CLICK_THRESHOLD||Math.abs(e.clientY-pointerDownPos.y)>CLICK_THRESHOLD) return;
+      raycaster.setFromCamera(getMouseNDC(e),camera);
+      const hits=raycaster.intersectObjects(getAllMeshes(),true);
+      if (hits.length===0) return;
+      const point=hits[0].point.clone();
       if (!measureFirstPoint) {
-        const geo = new THREE.SphereGeometry(1, 8, 8);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xf39c12 });
-        const marker = new THREE.Mesh(geo, mat);
-        marker.position.copy(point);
-        marker.scale.setScalar(getMarkerSize());
-        scene.add(marker);
-        measureFirstPoint = { point, marker };
-        document.getElementById('action-hint').textContent = 'Покрути модель и кликни на вторую точку';
+        const marker=new THREE.Mesh(new THREE.SphereGeometry(1,8,8),new THREE.MeshBasicMaterial({color:0xf39c12}));
+        marker.position.copy(point); marker.scale.setScalar(getMarkerSize()); scene.add(marker);
+        measureFirstPoint={point,marker};
+        document.getElementById('action-hint').textContent='Покрути модель и кликни на вторую точку';
       } else {
         scene.remove(measureFirstPoint.marker);
-        addMeasurement(measureFirstPoint.point, point);
-        measureFirstPoint = null;
-        document.getElementById('action-hint').textContent = 'Готово! Кликни снова для нового измерения';
-        setTimeout(() => {
-          if (measureMode) document.getElementById('action-hint').textContent = 'Кликни на первую точку модели';
-        }, 2000);
+        addMeasurement(measureFirstPoint.point,point);
+        measureFirstPoint=null;
+        document.getElementById('action-hint').textContent='Готово! Кликни снова для нового измерения';
+        setTimeout(()=>{ if (measureMode) document.getElementById('action-hint').textContent='Кликни на первую точку модели'; },2000);
       }
     });
 
     // --- Измерения ---
 
     function toggleMeasure() {
-      measureMode = !measureMode;
-      const btn = document.getElementById('measure-btn');
-      const hint = document.getElementById('action-hint');
+      measureMode=!measureMode;
+      const btn=document.getElementById('measure-btn');
+      const hint=document.getElementById('action-hint');
       if (measureMode) {
         if (moveMode) toggleMove();
-        btn.classList.add('active');
-        btn.textContent = 'Измерение вкл';
-        hint.className = 'measure';
-        hint.textContent = 'Кликни на первую точку модели';
-        hint.style.display = 'block';
-        // controls.enabled остаётся true — вращение работает!
-        measureFirstPoint = null;
+        btn.classList.add('active'); btn.textContent='Измерение вкл';
+        hint.className='measure'; hint.textContent='Кликни на первую точку модели';
+        hint.style.display='block'; measureFirstPoint=null;
       } else {
-        btn.classList.remove('active');
-        btn.textContent = 'Измерить';
-        hint.style.display = 'none';
-        snapMarker.visible = false;
-        snapCursor.style.display = 'none';
-        if (measureFirstPoint) {
-          scene.remove(measureFirstPoint.marker);
-          measureFirstPoint = null;
-        }
+        btn.classList.remove('active'); btn.textContent='Измерить';
+        hint.style.display='none'; snapMarker.visible=false;
+        if (measureFirstPoint) { scene.remove(measureFirstPoint.marker); measureFirstPoint=null; }
       }
     }
 
-    function toggleMeasureList() {
-      document.getElementById('measure-list-panel').classList.toggle('visible');
-    }
+    function toggleMeasureList() { document.getElementById('measure-list-panel').classList.toggle('visible'); }
 
     function renderMeasureList() {
-      const list = document.getElementById('measure-list');
-      list.innerHTML = '';
-      measurements.forEach(m => {
-        const item = document.createElement('div');
-        item.className = 'measure-item';
-        item.innerHTML = `
-          <span class="measure-item-label">№${m.id}</span>
-          <span class="measure-item-val">${m.label}</span>
-          <button class="measure-item-del" onclick="removeMeasurement(${m.id})">✕</button>
-        `;
+      const list=document.getElementById('measure-list');
+      list.innerHTML='';
+      measurements.forEach(m=>{
+        const item=document.createElement('div');
+        item.className='measure-item';
+        item.innerHTML=`<span class="measure-item-label">№${m.id}</span><span class="measure-item-val">${m.label}</span><button class="measure-item-del" onclick="removeMeasurement(${m.id})">✕</button>`;
         list.appendChild(item);
       });
-      const btn = document.getElementById('measures-list-btn');
-      if (measurements.length > 0) {
-        btn.style.display = 'inline-block';
-        btn.textContent = `Измерения (${measurements.length})`;
-      } else {
-        btn.style.display = 'none';
-        document.getElementById('measure-list-panel').classList.remove('visible');
-      }
+      const btn=document.getElementById('measures-list-btn');
+      if (measurements.length>0) { btn.style.display='inline-block'; btn.textContent=`Измерения (${measurements.length})`; }
+      else { btn.style.display='none'; document.getElementById('measure-list-panel').classList.remove('visible'); }
     }
 
-    function addMeasurement(p1, p2) {
-      const dist = p1.distanceTo(p2);
-      const label = dist>=1000?(dist/1000).toFixed(2)+' м':dist>=10?(dist/10).toFixed(2)+' см':dist.toFixed(2)+' мм';
-      const id = measNextId++;
-      const markers = [];
-      [p1, p2].forEach(p => {
-        const sphere = new THREE.Mesh(
-          new THREE.SphereGeometry(1, 8, 8),
-          new THREE.MeshBasicMaterial({ color: 0xe74c3c })
-        );
-        sphere.position.copy(p);
-        sphere.scale.setScalar(getMarkerSize());
-        scene.add(sphere);
-        markers.push(sphere);
-      });
-      const line = new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints([p1, p2]),
-        new THREE.LineBasicMaterial({ color: 0xe74c3c })
-      );
+    function addMeasurement(p1,p2) {
+      const dist=p1.distanceTo(p2);
+      const label=dist>=1000?(dist/1000).toFixed(2)+' м':dist>=10?(dist/10).toFixed(2)+' см':dist.toFixed(2)+' мм';
+      const id=measNextId++;
+      const markers=[];
+      [p1,p2].forEach(p=>{ const s=new THREE.Mesh(new THREE.SphereGeometry(1,8,8),new THREE.MeshBasicMaterial({color:0xe74c3c})); s.position.copy(p); s.scale.setScalar(getMarkerSize()); scene.add(s); markers.push(s); });
+      const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([p1,p2]),new THREE.LineBasicMaterial({color:0xe74c3c}));
       scene.add(line);
-      measurements.push({ id, p1, p2, label, markers, line });
+      measurements.push({id,p1,p2,label,markers,line});
       renderMeasureList();
     }
 
     function removeMeasurement(id) {
-      const idx = measurements.findIndex(m => m.id === id);
-      if (idx === -1) return;
-      const m = measurements[idx];
-      m.markers.forEach(mk => scene.remove(mk));
-      scene.remove(m.line);
-      measurements.splice(idx, 1);
-      renderMeasureList();
+      const idx=measurements.findIndex(m=>m.id===id); if (idx===-1) return;
+      const m=measurements[idx]; m.markers.forEach(mk=>scene.remove(mk)); scene.remove(m.line);
+      measurements.splice(idx,1); renderMeasureList();
     }
 
     function clearAllMeasurements() {
-      measurements.forEach(m => {
-        m.markers.forEach(mk => scene.remove(mk));
-        scene.remove(m.line);
-      });
-      measurements.length = 0;
-      renderMeasureList();
+      measurements.forEach(m=>{ m.markers.forEach(mk=>scene.remove(mk)); scene.remove(m.line); });
+      measurements.length=0; renderMeasureList();
     }
 
     // --- Сечение ---
 
     function toggleClip() {
-      clipActive = !clipActive;
+      clipActive=!clipActive;
       if (clipActive) {
+        closeAllBottomPanels();
         document.getElementById('clip-panel').classList.add('visible');
         document.getElementById('clip-btn').classList.add('active');
-        document.getElementById('clip-btn').textContent = 'Сечение вкл';
-        document.getElementById('clear-clip-btn').style.display = 'inline-block';
+        document.getElementById('clip-btn').textContent='Сечение вкл';
+        document.getElementById('clear-clip-btn').style.display='inline-block';
         updateClip();
-      } else { clearClip(); }
+      } else clearClip();
     }
 
     function clearClip() {
-      clipActive = false;
+      clipActive=false;
       document.getElementById('clip-panel').classList.remove('visible');
       document.getElementById('clip-btn').classList.remove('active');
-      document.getElementById('clip-btn').textContent = 'Сечение';
-      document.getElementById('clear-clip-btn').style.display = 'none';
-      clipPlanes.forEach(p => p.constant = Infinity);
-      models.forEach(m => applyMaterial(m.obj, m.color, []));
-      ['clip-x','clip-y','clip-z'].forEach(id => { document.getElementById(id).value = 1; });
-      ['clip-x-val','clip-y-val','clip-z-val'].forEach(id => { document.getElementById(id).textContent = 'выкл'; });
+      document.getElementById('clip-btn').textContent='Сечение';
+      document.getElementById('clear-clip-btn').style.display='none';
+      clipPlanes.forEach(p=>p.constant=Infinity);
+      models.forEach(m=>applyMaterial(m.obj,m.color,[]));
+      ['clip-x','clip-y','clip-z'].forEach(id=>{ document.getElementById(id).value=1; });
+      ['clip-x-val','clip-y-val','clip-z-val'].forEach(id=>{ document.getElementById(id).textContent='выкл'; });
     }
 
     function updateClip() {
-      if (models.length === 0) return;
-      const box = new THREE.Box3();
-      models.forEach(m => box.expandByObject(m.obj));
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-      ['x','y','z'].forEach((axis, i) => {
-        const val = parseFloat(document.getElementById('clip-'+axis).value);
-        clipPlanes[i].constant = [center.x,center.y,center.z][i]+val*[size.x,size.y,size.z][i]*0.5;
-        document.getElementById('clip-'+axis+'-val').textContent = Math.round((val+1)/2*100)+'%';
+      if (models.length===0) return;
+      const box=new THREE.Box3(); models.forEach(m=>box.expandByObject(m.obj));
+      const size=box.getSize(new THREE.Vector3()); const center=box.getCenter(new THREE.Vector3());
+      ['x','y','z'].forEach((axis,i)=>{
+        const val=parseFloat(document.getElementById('clip-'+axis).value);
+        clipPlanes[i].constant=[center.x,center.y,center.z][i]+val*[size.x,size.y,size.z][i]*0.5;
+        document.getElementById('clip-'+axis+'-val').textContent=Math.round((val+1)/2*100)+'%';
       });
-      models.forEach(m => applyMaterial(m.obj, m.color, clipPlanes));
+      models.forEach(m=>applyMaterial(m.obj,m.color,clipPlanes));
     }
 
     // --- Зум ---
 
-    function zoomIn() {
-      const dir = new THREE.Vector3();
-      dir.subVectors(controls.target, camera.position).normalize();
-      camera.position.addScaledVector(dir, lastModelSize * 0.2);
-      controls.update();
-    }
-
-    function zoomOut() {
-      const dir = new THREE.Vector3();
-      dir.subVectors(controls.target, camera.position).normalize();
-      camera.position.addScaledVector(dir, -lastModelSize * 0.2);
-      controls.update();
-    }
-
+    function zoomIn() { const dir=new THREE.Vector3(); dir.subVectors(controls.target,camera.position).normalize(); camera.position.addScaledVector(dir,lastModelSize*0.2); controls.update(); }
+    function zoomOut() { const dir=new THREE.Vector3(); dir.subVectors(controls.target,camera.position).normalize(); camera.position.addScaledVector(dir,-lastModelSize*0.2); controls.update(); }
     function resetZoom() { fitAllModels(); }
 
     // --- Загрузка ---
 
     function onModelLoaded(obj, filename) {
-      const color = MODEL_COLORS[models.length % MODEL_COLORS.length];
-      const id = nextId++;
-      const box = new THREE.Box3().setFromObject(obj);
-      const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
+      const color=MODEL_COLORS[models.length%MODEL_COLORS.length];
+      const id=nextId++;
+      const box=new THREE.Box3().setFromObject(obj);
+      const center=box.getCenter(new THREE.Vector3());
+      const size=box.getSize(new THREE.Vector3());
       obj.position.sub(center);
-      if (models.length > 0) obj.position.x += models.length * size.x * 1.3;
-      const basePosition = obj.position.clone();
-      applyMaterial(obj, color, clipActive ? clipPlanes : []);
+      if (models.length>0) obj.position.x+=models.length*size.x*1.3;
+      const basePosition=obj.position.clone();
+      applyMaterial(obj,color,clipActive?clipPlanes:[]);
       scene.add(obj);
-      models.push({ id, obj, name: filename, color, basePosition, offset: {x:0,y:0,z:0} });
-      selectedModelId = id;
-      document.getElementById('color-picker').value = color;
-      document.getElementById('export-name').value = filename.replace(/\.[^.]+$/, '');
-      const maxDim = Math.max(size.x, size.y, size.z);
-      lastModelSize = maxDim;
-      updateGrid(maxDim);
-      updateRuler(maxDim);
-      updateDimensions(obj);
-      renderModelList();
-      fitAllModels();
-      loading.style.display = 'none';
-      status.textContent = filename;
+      models.push({id,obj,name:filename,color,basePosition,offset:{x:0,y:0,z:0}});
+      selectedModelId=id;
+      document.getElementById('color-picker').value=color;
+      document.getElementById('export-name').value=filename.replace(/\.[^.]+$/,'');
+      const maxDim=Math.max(size.x,size.y,size.z);
+      lastModelSize=maxDim;
+      updateGrid(maxDim); updateRuler(maxDim); updateDimensions(obj);
+      renderModelList(); fitAllModels();
+      loading.style.display='none'; status.textContent=filename;
       document.getElementById('model-list-panel').classList.add('visible');
     }
 
-    document.getElementById('file-input').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      e.target.value = '';
-      const ext = file.name.split('.').pop().toLowerCase();
-      status.textContent = 'Загружаю ' + file.name + '...';
-      loading.style.display = 'block';
+    document.getElementById('file-input').addEventListener('change', async (e)=>{
+      const file=e.target.files[0]; if (!file) return;
+      e.target.value='';
+      const ext=file.name.split('.').pop().toLowerCase();
+      status.textContent='Загружаю '+file.name+'...'; loading.style.display='block';
       try {
-        if (ext === 'stl') {
-          onModelLoaded(new THREE.Mesh(new THREE.STLLoader().parse(await file.arrayBuffer()), new THREE.MeshStandardMaterial()), file.name);
-          return;
-        }
-        if (ext === 'obj') { onModelLoaded(new THREE.OBJLoader().parse(await file.text()), file.name); return; }
-        if (ext === 'fbx') { onModelLoaded(new THREE.FBXLoader().parse(await file.arrayBuffer(), ''), file.name); return; }
-        if (ext === 'glb' || ext === 'gltf') {
-          new THREE.GLTFLoader().load(URL.createObjectURL(file), (gltf) => onModelLoaded(gltf.scene, file.name));
-          return;
-        }
-        const formData = new FormData();
-        formData.append('model', file);
-        const response = await fetch('/convert', { method: 'POST', body: formData });
+        if (ext==='stl') { onModelLoaded(new THREE.Mesh(new THREE.STLLoader().parse(await file.arrayBuffer()),new THREE.MeshStandardMaterial()),file.name); return; }
+        if (ext==='obj') { onModelLoaded(new THREE.OBJLoader().parse(await file.text()),file.name); return; }
+        if (ext==='fbx') { onModelLoaded(new THREE.FBXLoader().parse(await file.arrayBuffer(),''),file.name); return; }
+        if (ext==='glb'||ext==='gltf') { new THREE.GLTFLoader().load(URL.createObjectURL(file),(gltf)=>onModelLoaded(gltf.scene,file.name)); return; }
+        const formData=new FormData(); formData.append('model',file);
+        const response=await fetch('/convert',{method:'POST',body:formData});
         if (!response.ok) throw new Error('Ошибка сервера');
-        new THREE.GLTFLoader().load(URL.createObjectURL(await response.blob()), (gltf) => onModelLoaded(gltf.scene, file.name));
-      } catch (err) {
-        loading.style.display = 'none';
-        status.textContent = 'Ошибка: ' + err.message;
-      }
+        new THREE.GLTFLoader().load(URL.createObjectURL(await response.blob()),(gltf)=>onModelLoaded(gltf.scene,file.name));
+      } catch(err) { loading.style.display='none'; status.textContent='Ошибка: '+err.message; }
     });
   </script>
 </body>
