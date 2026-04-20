@@ -216,13 +216,6 @@
     .rotate-btns .btn { flex: 1; font-size: 11px; padding: 5px 6px; }
     #rotate-actions { display: flex; gap: 6px; }
     #rotate-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
-    #lay-flat-hint {
-      font-size: 11px; color: #e67e22; text-align: center;
-      padding: 6px 8px; background: rgba(230,126,34,0.15);
-      border-radius: 5px; border: 1px solid rgba(230,126,34,0.3);
-      display: none;
-    }
-
     #zoom-btns {
       position: absolute; right: 20px; top: 50%;
       transform: translateY(-50%);
@@ -274,7 +267,7 @@
     <button class="btn" id="move-btn" onclick="toggleMove()">Переместить</button>
     <div class="sep"></div>
     <button class="btn" id="rotate-btn" onclick="toggleRotate()">Вращение</button>
-    <button class="btn" id="lay-flat-btn" onclick="toggleLayFlat()">На стол</button>
+    <button class="btn" onclick="layFlat()">На стол</button>
     <div class="sep"></div>
     <button class="btn" id="scale-btn" onclick="toggleScale()">Масштаб</button>
     <div class="sep"></div>
@@ -369,7 +362,6 @@
       <button class="btn" onclick="applyRotation()">Применить</button>
       <button class="btn" onclick="resetRotation()">Сбросить</button>
     </div>
-    <div id="lay-flat-hint">Кликни на грань модели чтобы положить её на стол</div>
   </div>
 
   <!-- Панель масштаба -->
@@ -665,7 +657,6 @@
       document.getElementById('rotate-btn').classList.remove('active');
       document.getElementById('rotate-btn').textContent = 'Вращение';
       rotateMode = false;
-      document.getElementById('lay-flat-hint').style.display = 'none';
     }
 
     updateGrid(100);
@@ -893,7 +884,6 @@
       const panel = document.getElementById('rotate-panel');
       if (rotateMode) {
         if (moveMode) toggleMove();
-        if (layFlatMode) toggleLayFlat();
         closeAllBottomPanels();
         panel.classList.add('visible');
         btn.classList.add('active');
@@ -904,7 +894,6 @@
         panel.classList.remove('visible');
         btn.classList.remove('active');
         btn.textContent = 'Вращение';
-        document.getElementById('lay-flat-hint').style.display = 'none';
       }
     }
 
@@ -958,71 +947,22 @@
 
     // --- Положить на стол ---
 
-    let highlightMesh = null;
-    let highlightFaceIndex = -1;
-
-    function toggleLayFlat() {
-      layFlatMode = !layFlatMode;
-      const btn = document.getElementById('lay-flat-btn');
-      const hint = document.getElementById('lay-flat-hint');
-      if (layFlatMode) {
-        if (moveMode) toggleMove();
-        if (!rotateMode) toggleRotate();
-        btn.classList.add('active');
-        btn.textContent = 'На стол вкл';
-        hint.style.display = 'block';
-        hint.textContent = 'Наведи на грань модели и кликни — она ляжет на стол';
-      } else {
-        btn.classList.remove('active');
-        btn.textContent = 'На стол';
-        hint.style.display = 'none';
-        clearFaceHighlight();
-      }
-    }
-
-    // Создаём вспомогательный меш для подсветки грани
-    const faceHighlight = new THREE.Mesh(
-      new THREE.BufferGeometry(),
-      new THREE.MeshBasicMaterial({ color: 0xe67e22, side: THREE.DoubleSide, transparent: true, opacity: 0.6, depthTest: false })
-    );
-    faceHighlight.visible = false;
-    scene.add(faceHighlight);
-
-    function clearFaceHighlight() {
-      faceHighlight.visible = false;
-      highlightMesh = null;
-      highlightFaceIndex = -1;
-    }
-
-    function highlightFace(hit) {
-      if (!hit || !hit.face) return;
-      const geo = hit.object.geometry;
-      const idx = hit.faceIndex;
-      const pos = geo.attributes.position;
-      const matrix = hit.object.matrixWorld;
-
-      let ia, ib, ic;
-      if (geo.index) {
-        ia = geo.index.getX(idx * 3);
-        ib = geo.index.getX(idx * 3 + 1);
-        ic = geo.index.getX(idx * 3 + 2);
-      } else {
-        ia = idx * 3; ib = idx * 3 + 1; ic = idx * 3 + 2;
-      }
-
-      const a = new THREE.Vector3(pos.getX(ia), pos.getY(ia), pos.getZ(ia)).applyMatrix4(matrix);
-      const b = new THREE.Vector3(pos.getX(ib), pos.getY(ib), pos.getZ(ib)).applyMatrix4(matrix);
-      const c = new THREE.Vector3(pos.getX(ic), pos.getY(ic), pos.getZ(ic)).applyMatrix4(matrix);
-
-      const highlightGeo = new THREE.BufferGeometry();
-      highlightGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
-        a.x,a.y,a.z, b.x,b.y,b.z, c.x,c.y,c.z
-      ]), 3));
-      faceHighlight.geometry.dispose();
-      faceHighlight.geometry = highlightGeo;
-      faceHighlight.visible = true;
-      highlightMesh = hit.object;
-      highlightFaceIndex = idx;
+    function layFlat() {
+      const m = getSelectedModel();
+      if (!m) return;
+      // Возвращаем в центр по X и Z
+      m.obj.position.x = 0;
+      m.obj.position.z = 0;
+      // Опускаем на сетку по Y
+      m.obj.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(m.obj);
+      m.obj.position.y -= box.min.y;
+      m.basePosition = m.obj.position.clone();
+      m.offset = { x: 0, y: 0, z: 0 };
+      syncRotationInputs(m);
+      syncMoveSliders(m);
+      updateDimensions(m.obj);
+      fitAllModels();
     }
 
     // --- Экспорт ---
@@ -1136,16 +1076,6 @@
         else snapMarker.visible=false;
       } else snapMarker.visible=false;
 
-      // Подсветка грани в режиме "На стол"
-      if (layFlatMode && models.length>0) {
-        raycaster.setFromCamera(getMouseNDC(e), camera);
-        const hits = raycaster.intersectObjects(getAllMeshes(), true);
-        if (hits.length>0) highlightFace(hits[0]);
-        else clearFaceHighlight();
-      } else if (!layFlatMode) {
-        clearFaceHighlight();
-      }
-
       if (!moveMode||!isDragging) return;
       const m=getSelectedModel(); if (!m) return;
       const rect=canvas.getBoundingClientRect();
@@ -1166,50 +1096,6 @@
 
     canvas.addEventListener('pointerup',(e)=>{
       isDragging=false;
-
-      // Режим "положить на стол" — кликаем на грань
-      if (layFlatMode && models.length > 0) {
-        if (Math.abs(e.clientX-pointerDownPos.x)>CLICK_THRESHOLD||Math.abs(e.clientY-pointerDownPos.y)>CLICK_THRESHOLD) return;
-        raycaster.setFromCamera(getMouseNDC(e), camera);
-        const hits = raycaster.intersectObjects(getAllMeshes(), true);
-        if (hits.length === 0) return;
-
-        const m = getSelectedModel(); if (!m) return;
-        const hit = hits[0];
-
-        // Получаем нормаль грани в мировых координатах
-        const localNormal = hit.face.normal.clone();
-        const worldNormal = localNormal.clone()
-          .applyMatrix3(new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld))
-          .normalize();
-
-        // Поворачиваем модель так чтобы эта грань смотрела вниз
-        const down = new THREE.Vector3(0, -1, 0);
-        // Проверяем не параллельна ли нормаль уже вектору вниз
-        if (Math.abs(worldNormal.dot(down)) < 0.9999) {
-          const q = new THREE.Quaternion().setFromUnitVectors(worldNormal, down);
-          m.obj.applyQuaternion(q);
-        } else if (worldNormal.dot(down) < 0) {
-          // Нормаль уже смотрит вниз — всё хорошо
-        } else {
-          // Нормаль смотрит вверх — поворачиваем на 180°
-          const axis = new THREE.Vector3(1, 0, 0);
-          const q = new THREE.Quaternion().setFromAxisAngle(axis, Math.PI);
-          m.obj.applyQuaternion(q);
-        }
-
-        repositionOnGround(m);
-        syncRotationInputs(m);
-        updateDimensions(m.obj);
-        clearFaceHighlight();
-
-        // Выключаем режим после клика
-        layFlatMode = false;
-        document.getElementById('lay-flat-btn').classList.remove('active');
-        document.getElementById('lay-flat-btn').textContent = 'На стол';
-        document.getElementById('lay-flat-hint').style.display = 'none';
-        return;
-      }
 
       if (!measureMode||models.length===0) return;
       if (Math.abs(e.clientX-pointerDownPos.x)>CLICK_THRESHOLD||Math.abs(e.clientY-pointerDownPos.y)>CLICK_THRESHOLD) return;
@@ -1235,7 +1121,7 @@
       const dx = Math.abs(e.clientX - pointerDownPos.x);
       const dy = Math.abs(e.clientY - pointerDownPos.y);
       if (dx > CLICK_THRESHOLD || dy > CLICK_THRESHOLD) return;
-      if (measureMode || moveMode || rotateMode || layFlatMode) return;
+      if (measureMode || moveMode || rotateMode) return;
 
       raycaster.setFromCamera(getMouseNDC(e), camera);
       const hits = raycaster.intersectObjects(getAllMeshes(), true);
@@ -1249,7 +1135,6 @@
 
       if (moveMode) toggleMove();
       if (rotateMode) toggleRotate();
-      if (layFlatMode) toggleLayFlat();
     });
 
     // --- Измерения ---
