@@ -195,6 +195,34 @@
     .clip-row span { width: 48px; text-align: right; font-size: 11px; color: #7a9cc0; }
     #clip-title { font-size: 12px; color: #aaa; margin-bottom: 2px; }
 
+    /* Панель вращения */
+    #rotate-panel {
+      position: absolute; left: 16px; bottom: 20px;
+      background: rgba(0,0,0,0.75); border-radius: 8px; padding: 12px 14px;
+      display: none; flex-direction: column; gap: 10px; min-width: 240px;
+    }
+    #rotate-panel.visible { display: flex; }
+    #rotate-title { font-size: 11px; color: #aaa; }
+    .rotate-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .rotate-row label { width: 16px; color: #aaa; flex-shrink: 0; }
+    .rotate-input {
+      flex: 1; background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px; color: white; font-size: 12px; padding: 5px 8px;
+    }
+    .rotate-input:focus { outline: none; border-color: #533483; }
+    .rotate-unit { font-size: 11px; color: #7a9cc0; width: 20px; }
+    .rotate-btns { display: flex; gap: 4px; }
+    .rotate-btns .btn { flex: 1; font-size: 11px; padding: 5px 6px; }
+    #rotate-actions { display: flex; gap: 6px; }
+    #rotate-actions .btn { flex: 1; font-size: 11px; padding: 5px 8px; }
+    #lay-flat-hint {
+      font-size: 11px; color: #e67e22; text-align: center;
+      padding: 6px 8px; background: rgba(230,126,34,0.15);
+      border-radius: 5px; border: 1px solid rgba(230,126,34,0.3);
+      display: none;
+    }
+
     #zoom-btns {
       position: absolute; right: 20px; top: 50%;
       transform: translateY(-50%);
@@ -244,6 +272,9 @@
     <button class="btn" id="models-btn" onclick="toggleModelList()">Модели (0)</button>
     <div class="sep"></div>
     <button class="btn" id="move-btn" onclick="toggleMove()">Переместить</button>
+    <div class="sep"></div>
+    <button class="btn" id="rotate-btn" onclick="toggleRotate()">Вращение</button>
+    <button class="btn" id="lay-flat-btn" onclick="toggleLayFlat()">На стол</button>
     <div class="sep"></div>
     <button class="btn" id="scale-btn" onclick="toggleScale()">Масштаб</button>
     <div class="sep"></div>
@@ -302,6 +333,43 @@
     <div id="volume-sub">см³</div>
     <div id="volume-info"></div>
     <button class="btn" id="volume-calc-btn" onclick="calculateVolume()">Рассчитать</button>
+  </div>
+
+  <!-- Панель вращения -->
+  <div id="rotate-panel">
+    <div id="rotate-title">Вращение выбранной модели</div>
+    <div class="rotate-row">
+      <label>X</label>
+      <input type="number" class="rotate-input" id="rot-x" value="0" step="1" placeholder="°">
+      <span class="rotate-unit">°</span>
+      <div class="rotate-btns">
+        <button class="btn" onclick="rotateStep('x',-90)">-90°</button>
+        <button class="btn" onclick="rotateStep('x',90)">+90°</button>
+      </div>
+    </div>
+    <div class="rotate-row">
+      <label>Y</label>
+      <input type="number" class="rotate-input" id="rot-y" value="0" step="1" placeholder="°">
+      <span class="rotate-unit">°</span>
+      <div class="rotate-btns">
+        <button class="btn" onclick="rotateStep('y',-90)">-90°</button>
+        <button class="btn" onclick="rotateStep('y',90)">+90°</button>
+      </div>
+    </div>
+    <div class="rotate-row">
+      <label>Z</label>
+      <input type="number" class="rotate-input" id="rot-z" value="0" step="1" placeholder="°">
+      <span class="rotate-unit">°</span>
+      <div class="rotate-btns">
+        <button class="btn" onclick="rotateStep('z',-90)">-90°</button>
+        <button class="btn" onclick="rotateStep('z',90)">+90°</button>
+      </div>
+    </div>
+    <div id="rotate-actions">
+      <button class="btn" onclick="applyRotation()">Применить</button>
+      <button class="btn" onclick="resetRotation()">Сбросить</button>
+    </div>
+    <div id="lay-flat-hint">Кликни на грань модели чтобы положить её на стол</div>
   </div>
 
   <!-- Панель масштаба -->
@@ -439,6 +507,7 @@
 
     let grid = null, lastModelSize = 100, isLight = false, clipActive = false;
     let moveMode = false, measureMode = false, measureFirstPoint = null;
+    let rotateMode = false, layFlatMode = false;
     let pointerDownPos = { x:0, y:0 };
     const CLICK_THRESHOLD = 5;
 
@@ -593,11 +662,15 @@
     }
 
     function closeAllBottomPanels() {
-      ['scale-panel','move-panel','clip-panel','measure-list-panel','volume-panel'].forEach(id => {
+      ['scale-panel','move-panel','clip-panel','measure-list-panel','volume-panel','rotate-panel'].forEach(id => {
         document.getElementById(id).classList.remove('visible');
       });
       document.getElementById('scale-btn').classList.remove('active');
       document.getElementById('volume-btn').classList.remove('active');
+      document.getElementById('rotate-btn').classList.remove('active');
+      document.getElementById('rotate-btn').textContent = 'Вращение';
+      rotateMode = false;
+      document.getElementById('lay-flat-hint').style.display = 'none';
     }
 
     updateGrid(100);
@@ -679,6 +752,7 @@
         syncMoveSliders(m);
         document.getElementById('export-name').value = m.name.replace(/\.[^.]+$/,'');
         updateScalePanel(m);
+        syncRotationInputs(m);
         // Пересчитываем объём если панель открыта
         if (document.getElementById('volume-panel').classList.contains('visible')) calculateVolume();
       }
@@ -829,6 +903,99 @@
       document.getElementById('info-volume').style.display='none';
     }
 
+    // --- Вращение ---
+
+    function toggleRotate() {
+      rotateMode = !rotateMode;
+      const btn = document.getElementById('rotate-btn');
+      const panel = document.getElementById('rotate-panel');
+      if (rotateMode) {
+        if (moveMode) toggleMove();
+        if (layFlatMode) toggleLayFlat();
+        closeAllBottomPanels();
+        panel.classList.add('visible');
+        btn.classList.add('active');
+        btn.textContent = 'Вращение вкл';
+        const m = getSelectedModel();
+        if (m) syncRotationInputs(m);
+      } else {
+        panel.classList.remove('visible');
+        btn.classList.remove('active');
+        btn.textContent = 'Вращение';
+        document.getElementById('lay-flat-hint').style.display = 'none';
+      }
+    }
+
+    function syncRotationInputs(m) {
+      const deg = v => Math.round(THREE.MathUtils.radToDeg(v));
+      document.getElementById('rot-x').value = deg(m.obj.rotation.x);
+      document.getElementById('rot-y').value = deg(m.obj.rotation.y);
+      document.getElementById('rot-z').value = deg(m.obj.rotation.z);
+    }
+
+    function rotateStep(axis, deg) {
+      const m = getSelectedModel(); if (!m) return;
+      const rad = THREE.MathUtils.degToRad(deg);
+      m.obj.rotation[axis] += rad;
+      syncRotationInputs(m);
+      repositionOnGround(m);
+      updateDimensions(m.obj);
+    }
+
+    function applyRotation() {
+      const m = getSelectedModel(); if (!m) return;
+      const rx = parseFloat(document.getElementById('rot-x').value) || 0;
+      const ry = parseFloat(document.getElementById('rot-y').value) || 0;
+      const rz = parseFloat(document.getElementById('rot-z').value) || 0;
+      m.obj.rotation.set(
+        THREE.MathUtils.degToRad(rx),
+        THREE.MathUtils.degToRad(ry),
+        THREE.MathUtils.degToRad(rz)
+      );
+      repositionOnGround(m);
+      updateDimensions(m.obj);
+    }
+
+    function resetRotation() {
+      const m = getSelectedModel(); if (!m) return;
+      m.obj.rotation.set(0, 0, 0);
+      syncRotationInputs(m);
+      repositionOnGround(m);
+      updateDimensions(m.obj);
+    }
+
+    // Опускаем модель на поверхность сетки после поворота
+    function repositionOnGround(m) {
+      m.obj.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(m.obj);
+      const minY = box.min.y;
+      m.obj.position.y -= minY;
+      m.basePosition = m.obj.position.clone();
+      m.offset = { x: m.offset?.x || 0, y: 0, z: m.offset?.z || 0 };
+    }
+
+    // --- Положить на стол ---
+
+    function toggleLayFlat() {
+      layFlatMode = !layFlatMode;
+      const btn = document.getElementById('lay-flat-btn');
+      const hint = document.getElementById('lay-flat-hint');
+      if (layFlatMode) {
+        if (moveMode) toggleMove();
+        // Открываем панель вращения если не открыта
+        if (!rotateMode) toggleRotate();
+        btn.classList.add('active');
+        btn.textContent = 'На стол вкл';
+        hint.style.display = 'block';
+        controls.enabled = false;
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = 'На стол';
+        hint.style.display = 'none';
+        controls.enabled = true;
+      }
+    }
+
     // --- Экспорт ---
 
     function toggleExport() { document.getElementById('export-panel').classList.toggle('visible'); }
@@ -957,6 +1124,36 @@
 
     canvas.addEventListener('pointerup',(e)=>{
       isDragging=false;
+
+      // Режим "положить на стол" — кликаем на грань
+      if (layFlatMode && models.length > 0) {
+        if (Math.abs(e.clientX-pointerDownPos.x)>CLICK_THRESHOLD||Math.abs(e.clientY-pointerDownPos.y)>CLICK_THRESHOLD) return;
+        raycaster.setFromCamera(getMouseNDC(e), camera);
+        const meshes = getAllMeshes();
+        const hits = raycaster.intersectObjects(meshes, true);
+        if (hits.length === 0) return;
+
+        const m = getSelectedModel(); if (!m) return;
+        const faceNormal = hits[0].face.normal.clone();
+        // Переводим нормаль грани в мировые координаты
+        const normalMatrix = new THREE.Matrix3().getNormalMatrix(hits[0].object.matrixWorld);
+        faceNormal.applyMatrix3(normalMatrix).normalize();
+
+        // Вычисляем поворот чтобы нормаль грани смотрела вниз (0,-1,0)
+        const down = new THREE.Vector3(0, -1, 0);
+        const quaternion = new THREE.Quaternion().setFromUnitVectors(faceNormal, down);
+        m.obj.quaternion.premultiply(quaternion);
+        m.obj.rotation.setFromQuaternion(m.obj.quaternion);
+
+        repositionOnGround(m);
+        syncRotationInputs(m);
+        updateDimensions(m.obj);
+
+        // Выключаем режим после клика
+        toggleLayFlat();
+        return;
+      }
+
       if (!measureMode||models.length===0) return;
       if (Math.abs(e.clientX-pointerDownPos.x)>CLICK_THRESHOLD||Math.abs(e.clientY-pointerDownPos.y)>CLICK_THRESHOLD) return;
       raycaster.setFromCamera(getMouseNDC(e),camera);
