@@ -832,16 +832,32 @@
     }
 
     function exportModel(format) {
-      const m = getSelectedModel(); if (!m) { alert('Сначала выбери модель в списке'); return; }
-      const name = document.getElementById('export-name').value.trim()||'model';
-      if (format==='stl') {
-        downloadBlob(new Blob([new THREE.STLExporter().parse(m.obj,{binary:true})],{type:'application/octet-stream'}), name+'.stl');
-      } else if (format==='obj') {
-        downloadBlob(new Blob([new THREE.OBJExporter().parse(m.obj)],{type:'text/plain'}), name+'.obj');
-      } else if (format==='glb') {
-        new THREE.GLTFExporter().parse(m.obj,(result)=>{
-          downloadBlob(new Blob([result],{type:'application/octet-stream'}), name+'.glb');
-        },{binary:true});
+      const m = getSelectedModel();
+      if (!m) { alert('Сначала выбери модель в списке'); return; }
+      const name = document.getElementById('export-name').value.trim() || 'model';
+
+      // Создаём копию объекта с запечённым масштабом
+      const clone = m.obj.clone();
+      clone.updateMatrixWorld(true);
+      clone.traverse((child) => {
+        if (!child.isMesh) return;
+        const geo = child.geometry.clone();
+        geo.applyMatrix4(child.matrixWorld);
+        child.geometry = geo;
+        child.position.set(0, 0, 0);
+        child.rotation.set(0, 0, 0);
+        child.scale.set(1, 1, 1);
+        child.updateMatrix();
+      });
+
+      if (format === 'stl') {
+        downloadBlob(new Blob([new THREE.STLExporter().parse(clone, { binary: true })], { type: 'application/octet-stream' }), name+'.stl');
+      } else if (format === 'obj') {
+        downloadBlob(new Blob([new THREE.OBJExporter().parse(clone)], { type: 'text/plain' }), name+'.obj');
+      } else if (format === 'glb') {
+        new THREE.GLTFExporter().parse(clone, (result) => {
+          downloadBlob(new Blob([result], { type: 'application/octet-stream' }), name+'.glb');
+        }, { binary: true });
       }
     }
 
