@@ -395,11 +395,6 @@
       <input type="checkbox" id="scale-lock" checked>
       <label for="scale-lock">Сохранять пропорции</label>
     </div>
-    <div class="scale-row">
-      <label>Коэффициент</label>
-      <input type="number" class="scale-input" id="scale-factor" min="0.001" step="0.1" placeholder="1.0">
-      <span class="scale-unit">×</span>
-    </div>
     <div id="scale-actions">
       <button class="btn" onclick="applyScale()">Применить</button>
       <button class="btn" onclick="resetScale()">Сбросить</button>
@@ -837,7 +832,6 @@
       document.getElementById('scale-x').value = size.x.toFixed(2);
       document.getElementById('scale-y').value = size.y.toFixed(2);
       document.getElementById('scale-z').value = size.z.toFixed(2);
-      document.getElementById('scale-factor').value = '1.0';
       document.getElementById('scale-current').textContent =
         'Текущий: '+size.x.toFixed(1)+' × '+size.y.toFixed(1)+' × '+size.z.toFixed(1)+' мм';
     }
@@ -854,18 +848,6 @@
       if (axis!=='x') document.getElementById('scale-x').value=(origSize.x*factor).toFixed(2);
       if (axis!=='y') document.getElementById('scale-y').value=(origSize.y*factor).toFixed(2);
       if (axis!=='z') document.getElementById('scale-z').value=(origSize.z*factor).toFixed(2);
-      document.getElementById('scale-factor').value=factor.toFixed(4);
-    }
-
-    function onScaleFactorChange() {
-      const m = getSelectedModel(); if (!m) return;
-      const factor = parseFloat(document.getElementById('scale-factor').value);
-      if (!factor||factor<=0) return;
-      const box = new THREE.Box3().setFromObject(m.obj);
-      const origSize = box.getSize(new THREE.Vector3());
-      document.getElementById('scale-x').value=(origSize.x*factor).toFixed(2);
-      document.getElementById('scale-y').value=(origSize.y*factor).toFixed(2);
-      document.getElementById('scale-z').value=(origSize.z*factor).toFixed(2);
     }
 
     function applyScale() {
@@ -976,24 +958,71 @@
 
     // --- Положить на стол ---
 
+    let highlightMesh = null;
+    let highlightFaceIndex = -1;
+
     function toggleLayFlat() {
       layFlatMode = !layFlatMode;
       const btn = document.getElementById('lay-flat-btn');
       const hint = document.getElementById('lay-flat-hint');
       if (layFlatMode) {
         if (moveMode) toggleMove();
-        // Открываем панель вращения если не открыта
         if (!rotateMode) toggleRotate();
         btn.classList.add('active');
         btn.textContent = 'На стол вкл';
         hint.style.display = 'block';
-        controls.enabled = true;
+        hint.textContent = 'Наведи на грань модели и кликни — она ляжет на стол';
       } else {
         btn.classList.remove('active');
         btn.textContent = 'На стол';
         hint.style.display = 'none';
-        controls.enabled = true;
+        clearFaceHighlight();
       }
+    }
+
+    // Создаём вспомогательный меш для подсветки грани
+    const faceHighlight = new THREE.Mesh(
+      new THREE.BufferGeometry(),
+      new THREE.MeshBasicMaterial({ color: 0xe67e22, side: THREE.DoubleSide, transparent: true, opacity: 0.6, depthTest: false })
+    );
+    faceHighlight.visible = false;
+    scene.add(faceHighlight);
+
+    function clearFaceHighlight() {
+      faceHighlight.visible = false;
+      highlightMesh = null;
+      highlightFaceIndex = -1;
+    }
+
+    function highlightFace(hit) {
+      if (!hit || !hit.face) return;
+      const geo = hit.object.geometry;
+      const idx = hit.faceIndex;
+      const pos = geo.attributes.position;
+      const matrix = hit.object.matrixWorld;
+
+      let ia, ib, ic;
+      if (geo.index) {
+        ia = geo.index.getX(idx * 3);
+        ib = geo.index.getX(idx * 3 + 1);
+        ic = geo.index.getX(idx * 3 + 2);
+      } else {
+        ia = idx * 3; ib = idx * 3 + 1; ic = idx * 3 + 2;
+      }
+
+      const a = new THREE.Vector3(pos.getX(ia), pos.getY(ia), pos.getZ(ia)).applyMatrix4(matrix);
+      const b = new THREE.Vector3(pos.getX(ib), pos.getY(ib), pos.getZ(ib)).applyMatrix4(matrix);
+      const c = new THREE.Vector3(pos.getX(ic), pos.getY(ic), pos.getZ(ic)).applyMatrix4(matrix);
+
+      const highlightGeo = new THREE.BufferGeometry();
+      highlightGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        a.x,a.y,a.z, b.x,b.y,b.z, c.x,c.y,c.z
+      ]), 3));
+      faceHighlight.geometry.dispose();
+      faceHighlight.geometry = highlightGeo;
+      faceHighlight.visible = true;
+      highlightMesh = hit.object;
+      highlightFaceIndex = idx;
     }
 
     // --- Экспорт ---
@@ -1107,6 +1136,16 @@
         else snapMarker.visible=false;
       } else snapMarker.visible=false;
 
+      // Подсветка грани в режиме "На стол"
+      if (layFlatMode && models.length>0) {
+        raycaster.setFromCamera(getMouseNDC(e), camera);
+        const hits = raycaster.intersectObjects(getAllMeshes(), true);
+        if (hits.length>0) highlightFace(hits[0]);
+        else clearFaceHighlight();
+      } else if (!layFlatMode) {
+        clearFaceHighlight();
+      }
+
       if (!moveMode||!isDragging) return;
       const m=getSelectedModel(); if (!m) return;
       const rect=canvas.getBoundingClientRect();
@@ -1132,28 +1171,43 @@
       if (layFlatMode && models.length > 0) {
         if (Math.abs(e.clientX-pointerDownPos.x)>CLICK_THRESHOLD||Math.abs(e.clientY-pointerDownPos.y)>CLICK_THRESHOLD) return;
         raycaster.setFromCamera(getMouseNDC(e), camera);
-        const meshes = getAllMeshes();
-        const hits = raycaster.intersectObjects(meshes, true);
+        const hits = raycaster.intersectObjects(getAllMeshes(), true);
         if (hits.length === 0) return;
 
         const m = getSelectedModel(); if (!m) return;
-        const faceNormal = hits[0].face.normal.clone();
-        // Переводим нормаль грани в мировые координаты
-        const normalMatrix = new THREE.Matrix3().getNormalMatrix(hits[0].object.matrixWorld);
-        faceNormal.applyMatrix3(normalMatrix).normalize();
+        const hit = hits[0];
 
-        // Вычисляем поворот чтобы нормаль грани смотрела вниз (0,-1,0)
+        // Получаем нормаль грани в мировых координатах
+        const localNormal = hit.face.normal.clone();
+        const worldNormal = localNormal.clone()
+          .applyMatrix3(new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld))
+          .normalize();
+
+        // Поворачиваем модель так чтобы эта грань смотрела вниз
         const down = new THREE.Vector3(0, -1, 0);
-        const quaternion = new THREE.Quaternion().setFromUnitVectors(faceNormal, down);
-        m.obj.quaternion.premultiply(quaternion);
-        m.obj.rotation.setFromQuaternion(m.obj.quaternion);
+        // Проверяем не параллельна ли нормаль уже вектору вниз
+        if (Math.abs(worldNormal.dot(down)) < 0.9999) {
+          const q = new THREE.Quaternion().setFromUnitVectors(worldNormal, down);
+          m.obj.applyQuaternion(q);
+        } else if (worldNormal.dot(down) < 0) {
+          // Нормаль уже смотрит вниз — всё хорошо
+        } else {
+          // Нормаль смотрит вверх — поворачиваем на 180°
+          const axis = new THREE.Vector3(1, 0, 0);
+          const q = new THREE.Quaternion().setFromAxisAngle(axis, Math.PI);
+          m.obj.applyQuaternion(q);
+        }
 
         repositionOnGround(m);
         syncRotationInputs(m);
         updateDimensions(m.obj);
+        clearFaceHighlight();
 
         // Выключаем режим после клика
-        toggleLayFlat();
+        layFlatMode = false;
+        document.getElementById('lay-flat-btn').classList.remove('active');
+        document.getElementById('lay-flat-btn').textContent = 'На стол';
+        document.getElementById('lay-flat-hint').style.display = 'none';
         return;
       }
 
