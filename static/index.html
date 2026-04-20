@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>3D Viewer</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#16213e">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #1a1a2e; font-family: sans-serif; color: white; }
@@ -1092,6 +1095,11 @@
         new THREE.GLTFLoader().load(URL.createObjectURL(await response.blob()),(gltf)=>onModelLoaded(gltf.scene,file.name));
       } catch(err) { loading.style.display='none'; status.textContent='Ошибка: '+err.message; }
     });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
   </script>
 </body>
 </html>
