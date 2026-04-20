@@ -987,7 +987,7 @@
         btn.classList.add('active');
         btn.textContent = 'На стол вкл';
         hint.style.display = 'block';
-        controls.enabled = false;
+        controls.enabled = true;
       } else {
         btn.classList.remove('active');
         btn.textContent = 'На стол';
@@ -1049,7 +1049,7 @@
         btn.classList.add('move-active'); btn.textContent='Перемещение вкл';
         panel.classList.add('visible');
         hint.className='move'; hint.textContent='Выбери модель в списке и двигай слайдеры или тяни по экрану';
-        hint.style.display='block'; controls.enabled=false;
+        hint.style.display='block'; controls.enabled=true;
         const m = getSelectedModel(); if (m) syncMoveSliders(m);
       } else {
         btn.classList.remove('move-active'); btn.textContent='Переместить';
@@ -1090,10 +1090,13 @@
       pointerDownPos={x:e.clientX,y:e.clientY};
       if (!moveMode) return;
       const m = getSelectedModel(); if (!m) return;
-      isDragging=true;
+      isDragging = true;
       const box = new THREE.Box3().setFromObject(m.obj);
-      dragPlane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()).negate(),box.getCenter(new THREE.Vector3()));
-      dragStart.set(e.clientX,e.clientY); e.preventDefault();
+      dragPlane.setFromNormalAndCoplanarPoint(
+        camera.getWorldDirection(new THREE.Vector3()).negate(),
+        box.getCenter(new THREE.Vector3())
+      );
+      dragStart.set(e.clientX, e.clientY);
     });
 
     canvas.addEventListener('pointermove',(e)=>{
@@ -1172,6 +1175,27 @@
         document.getElementById('action-hint').textContent='Готово! Кликни снова для нового измерения';
         setTimeout(()=>{ if (measureMode) document.getElementById('action-hint').textContent='Кликни на первую точку модели'; },2000);
       }
+    });
+	    // Клик на пустое место — выход из активного режима
+    canvas.addEventListener('click', (e) => {
+      const dx = Math.abs(e.clientX - pointerDownPos.x);
+      const dy = Math.abs(e.clientY - pointerDownPos.y);
+      if (dx > CLICK_THRESHOLD || dy > CLICK_THRESHOLD) return;
+      if (measureMode || moveMode || rotateMode || layFlatMode) return;
+
+      raycaster.setFromCamera(getMouseNDC(e), camera);
+      const hits = raycaster.intersectObjects(getAllMeshes(), true);
+      if (hits.length > 0) return; // клик по модели — не выходим
+
+      // Клик по пустому месту — закрываем все панели
+      closeAllBottomPanels();
+      document.getElementById('export-panel').classList.remove('visible');
+      document.getElementById('model-list-panel').classList.remove('visible');
+      document.getElementById('measure-list-panel').classList.remove('visible');
+
+      if (moveMode) toggleMove();
+      if (rotateMode) toggleRotate();
+      if (layFlatMode) toggleLayFlat();
     });
 
     // --- Измерения ---
