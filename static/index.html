@@ -480,14 +480,35 @@
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.localClippingEnabled = true;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.6));
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
     dirLight.position.set(500, 800, 500);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.camera.near = 0.5;
+    dirLight.shadow.camera.far = 5000;
+    dirLight.shadow.camera.left = -1000;
+    dirLight.shadow.camera.right = 1000;
+    dirLight.shadow.camera.top = 1000;
+    dirLight.shadow.camera.bottom = -1000;
+    dirLight.shadow.bias = -0.001;
     scene.add(dirLight);
     const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
     fillLight.position.set(-500, -200, -500);
     scene.add(fillLight);
+
+    // Невидимая плоскость для приёма теней
+    const shadowPlaneGeo = new THREE.PlaneGeometry(10000, 10000);
+    const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.25 });
+    const shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.y = 0;
+    shadowPlane.receiveShadow = true;
+    scene.add(shadowPlane);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -529,6 +550,13 @@
       const cells = Math.round(fieldSize/10);
       grid = new THREE.GridHelper(fieldSize, cells, 0x444466, 0x333355);
       scene.add(grid);
+      // Обновляем область теней под размер модели
+      const s = Math.max(modelSize * 5, 500);
+      dirLight.shadow.camera.left = -s;
+      dirLight.shadow.camera.right = s;
+      dirLight.shadow.camera.top = s;
+      dirLight.shadow.camera.bottom = -s;
+      dirLight.shadow.camera.updateProjectionMatrix();
     }
 
     function updateRuler(modelSize) {
@@ -684,6 +712,8 @@
             color: new THREE.Color(color), metalness: 0.2, roughness: 0.6,
             side: THREE.DoubleSide, clippingPlanes: planes, clipShadows: true
           });
+          child.castShadow = true;
+          child.receiveShadow = true;
         }
       });
     }
