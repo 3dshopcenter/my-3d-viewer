@@ -332,13 +332,75 @@
     body.light #status { color: #555; }
     body.light .btn { background: #3a6ea8; }
     body.light .btn:hover { background: #533483; }
+
+    /* Мобильное меню */
+    #mobile-menu-panel {
+      position: absolute; bottom: 60px; right: 8px;
+      background: rgba(15,20,50,0.97); border-radius: 10px;
+      padding: 8px; display: none; flex-direction: column; gap: 4px;
+      min-width: 160px; z-index: 300;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    #mobile-menu-panel.visible { display: flex; }
+    .mob-menu-btn {
+      background: none; border: none; color: white;
+      padding: 10px 14px; font-size: 13px; text-align: left;
+      border-radius: 6px; cursor: pointer; width: 100%;
+    }
+    .mob-menu-btn:active { background: rgba(255,255,255,0.1); }
+    .mob-menu-sep { height: 1px; background: rgba(255,255,255,0.1); margin: 2px 0; }
+
+    /* Мобильный тулбар */
+    #mobile-toolbar {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #16213e; z-index: 200;
+      padding: 6px 8px; gap: 4px;
+      justify-content: space-around; align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .mob-btn {
+      background: #0f3460; color: white; border: none;
+      padding: 8px 10px; border-radius: 6px;
+      font-size: 11px; cursor: pointer; flex: 1;
+      text-align: center; white-space: nowrap;
+    }
+    .mob-btn:active { background: #533483; }
+    .mob-btn.active { background: #c0392b; }
+
+    /* Мобильный инфобар */
+    #mobile-info {
+      display: none;
+      background: #0d1b2e; font-size: 11px; color: #7a9cc0;
+      padding: 3px 10px; gap: 10px; flex-wrap: nowrap;
+      overflow-x: auto; position: fixed;
+      top: 0; left: 0; right: 0; z-index: 200;
+    }
+
+    /* Определяем мобильное устройство через JS — класс .is-mobile на body */
+    body.is-mobile #toolbar { display: none !important; }
+    body.is-mobile #info-bar { display: none !important; }
+    body.is-mobile #mobile-toolbar { display: flex; }
+    body.is-mobile #mobile-info { display: flex; }
+    body.is-mobile canvas { height: calc(100vh - 44px) !important; margin-top: 24px; }
+    body.is-mobile #zoom-btns { bottom: 56px; top: auto; transform: none; right: 8px; }
+    body.is-mobile #ruler { bottom: 56px; right: 8px; }
+    body.is-mobile #export-panel { bottom: 56px; right: 8px; }
+    body.is-mobile #model-list-panel { top: 30px; max-height: 40vh; }
+    body.is-mobile #measure-list-panel { bottom: 56px; max-height: 30vh; }
+    body.is-mobile #scale-panel,
+    body.is-mobile #move-panel,
+    body.is-mobile #clip-panel,
+    body.is-mobile #rotate-panel,
+    body.is-mobile #volume-panel { bottom: 56px; left: 8px; right: 60px; min-width: unset; }
+    body.is-mobile #action-hint { top: 30px; }
   </style>
 </head>
 <body>
   <div id="toolbar">
     <h1>3D Viewer</h1>
     <button class="btn" onclick="document.getElementById('file-input').click()">Добавить модель</button>
-    <input type="file" id="file-input" accept=".stp,.step,.igs,.iges,.stl,.glb,.gltf,.obj,.fbx,.3mf,model/stl,model/x.stl-ascii,model/x.stl-binary,model/gltf-binary,model/gltf+json,application/octet-stream,application/sla,*/*">    <input type="file" id="file-input" accept=".stp,.step,.igs,.iges,.stl,.glb,.gltf,.obj,.fbx">
+    <input type="file" id="file-input" accept=".stp,.step,.igs,.iges,.stl,.glb,.gltf,.obj,.fbx,.3mf,model/stl,model/x.stl-ascii,model/x.stl-binary,model/gltf-binary,model/gltf+json,application/octet-stream,application/sla,*/*">
     <div class="sep"></div>
     <button class="btn" onclick="setView('front')">Спереди</button>
     <button class="btn" onclick="setView('side')">Сбоку</button>
@@ -378,6 +440,41 @@
     <span id="dim-y">Высота: —</span>
     <span id="dim-z">Глубина: —</span>
     <span id="info-volume" style="color:#1D9E75; display:none"></span>
+  </div>
+
+  <!-- Мобильный инфобар -->
+  <div id="mobile-info">
+    <span id="mob-dim-x">Ш: —</span>
+    <span id="mob-dim-y">В: —</span>
+    <span id="mob-dim-z">Г: —</span>
+    <span id="mob-volume" style="color:#1D9E75; display:none"></span>
+  </div>
+
+  <!-- Мобильный тулбар внизу -->
+  <div id="mobile-toolbar">
+    <button class="mob-btn" onclick="document.getElementById('file-input').click()">+ Модель</button>
+    <button class="mob-btn" id="mob-models-btn" onclick="toggleModelList()">Модели (0)</button>
+    <button class="mob-btn" id="mob-measure-btn" onclick="toggleMeasureMob()">Измерить</button>
+    <button class="mob-btn" id="mob-export-btn" onclick="toggleExport()">Экспорт</button>
+    <button class="mob-btn" onclick="toggleMobileMenu()">⋮ Ещё</button>
+  </div>
+
+  <!-- Мобильное меню "Ещё" -->
+  <div id="mobile-menu-panel">
+    <button class="mob-menu-btn" onclick="setView('front');toggleMobileMenu()">Спереди</button>
+    <button class="mob-menu-btn" onclick="setView('side');toggleMobileMenu()">Сбоку</button>
+    <button class="mob-menu-btn" onclick="setView('top');toggleMobileMenu()">Сверху</button>
+    <button class="mob-menu-btn" onclick="setView('iso');toggleMobileMenu()">3D вид</button>
+    <div class="mob-menu-sep"></div>
+    <button class="mob-menu-btn" onclick="toggleMove();toggleMobileMenu()">Переместить</button>
+    <button class="mob-menu-btn" onclick="toggleRotate();toggleMobileMenu()">Вращение</button>
+    <button class="mob-menu-btn" onclick="layFlat();toggleMobileMenu()">На стол</button>
+    <div class="mob-menu-sep"></div>
+    <button class="mob-menu-btn" onclick="toggleScale();toggleMobileMenu()">Масштаб</button>
+    <button class="mob-menu-btn" onclick="toggleVolume();toggleMobileMenu()">Объём</button>
+    <button class="mob-menu-btn" onclick="toggleClip();toggleMobileMenu()">Сечение</button>
+    <div class="mob-menu-sep"></div>
+    <button class="mob-menu-btn" onclick="toggleTheme();toggleMobileMenu()">Сменить тему</button>
   </div>
 
   <canvas id="canvas"></canvas>
@@ -549,6 +646,41 @@
 
   <script>
     const canvas = document.getElementById('canvas');
+
+    // Определяем мобильное устройство
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) document.body.classList.add('is-mobile');
+
+    function toggleMobileMenu() {
+      document.getElementById('mobile-menu-panel').classList.toggle('visible');
+    }
+
+    function toggleMeasureMob() {
+      toggleMeasure();
+      const btn = document.getElementById('mob-measure-btn');
+      btn.classList.toggle('active', measureMode);
+      btn.textContent = measureMode ? 'Стоп' : 'Измерить';
+    }
+
+    // Синхронизируем мобильный инфобар
+    function updateMobileDimensions(obj) {
+      if (!obj) {
+        document.getElementById('mob-dim-x').textContent = 'Ш: —';
+        document.getElementById('mob-dim-y').textContent = 'В: —';
+        document.getElementById('mob-dim-z').textContent = 'Г: —';
+        return;
+      }
+      const box = new THREE.Box3().setFromObject(obj);
+      const size = box.getSize(new THREE.Vector3());
+      document.getElementById('mob-dim-x').textContent = 'Ш: ' + size.x.toFixed(1);
+      document.getElementById('mob-dim-y').textContent = 'В: ' + size.y.toFixed(1);
+      document.getElementById('mob-dim-z').textContent = 'Г: ' + size.z.toFixed(1) + ' мм';
+    }
+
+    // Закрываем мобильное меню при клике на канвас
+    canvas.addEventListener('pointerdown', () => {
+      document.getElementById('mobile-menu-panel').classList.remove('visible');
+    }, { passive: true });
     const status = document.getElementById('status');
     const loading = document.getElementById('loading');
 
@@ -653,6 +785,7 @@
       if (!obj) {
         ['dim-x','dim-y','dim-z'].forEach((id,i)=>{ document.getElementById(id).textContent=['Ширина','Высота','Глубина'][i]+': —'; });
         document.getElementById('info-volume').style.display = 'none';
+        updateMobileDimensions(null);
         return;
       }
       const box = new THREE.Box3().setFromObject(obj);
@@ -660,6 +793,7 @@
       document.getElementById('dim-x').textContent='Ширина: '+size.x.toFixed(1)+' мм';
       document.getElementById('dim-y').textContent='Высота: '+size.y.toFixed(1)+' мм';
       document.getElementById('dim-z').textContent='Глубина: '+size.z.toFixed(1)+' мм';
+      updateMobileDimensions(obj);
     }
 
     // --- Подсчёт объёма по методу знакового объёма тетраэдра ---
@@ -840,6 +974,8 @@
         list.appendChild(item);
       });
       document.getElementById('models-btn').textContent=`Модели (${models.length})`;
+      const mobBtn = document.getElementById('mob-models-btn');
+      if (mobBtn) mobBtn.textContent = `Модели (${models.length})`;
     }
 
     function toggleModelList() { document.getElementById('model-list-panel').classList.toggle('visible'); }
