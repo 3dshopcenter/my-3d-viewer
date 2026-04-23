@@ -326,7 +326,18 @@
     #color-picker-wrap { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #aaa; }
     #color-picker { width: 28px; height: 28px; border: none; border-radius: 4px; cursor: pointer; padding: 0; background: none; }
 
-    body.light { background: #f0f0f0; }
+    #drag-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(29,158,117,0.15);
+      border: 3px dashed #1D9E75;
+      display: none; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    #drag-overlay.visible { display: flex; }
+    #drag-overlay-text {
+      font-size: 24px; color: #1D9E75; font-weight: 500;
+      background: rgba(0,0,0,0.7); padding: 20px 40px; border-radius: 12px;
+    }
     body.light #toolbar { background: #e0e8f0; color: #222; }
     body.light #info-bar { background: #d0dcea; color: #336; }
     body.light #status { color: #555; }
@@ -478,6 +489,7 @@
   </div>
 
   <canvas id="canvas"></canvas>
+  <div id="drag-overlay"><div id="drag-overlay-text">Отпустите для загрузки</div></div>
   <div id="loading">Загружаю модель...</div>
   <div id="action-hint"></div>
   <div id="snap-cursor"></div>
@@ -1524,6 +1536,10 @@
     document.getElementById('file-input').addEventListener('change', async (e)=>{
       const file=e.target.files[0]; if (!file) return;
       e.target.value='';
+      await loadFile(file);
+    });
+
+    async function loadFile(file) {
       const ext=file.name.split('.').pop().toLowerCase();
       status.textContent='Загружаю '+file.name+'...'; loading.style.display='block';
       try {
@@ -1536,6 +1552,36 @@
         if (!response.ok) throw new Error('Ошибка сервера');
         new THREE.GLTFLoader().load(URL.createObjectURL(await response.blob()),(gltf)=>onModelLoaded(gltf.scene,file.name));
       } catch(err) { loading.style.display='none'; status.textContent='Ошибка: '+err.message; }
+    }
+
+    // --- Drag & Drop ---
+    const dragOverlay = document.getElementById('drag-overlay');
+    let dragCounter = 0;
+
+    document.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      dragCounter++;
+      dragOverlay.classList.add('visible');
+    });
+
+    document.addEventListener('dragleave', (e) => {
+      dragCounter--;
+      if (dragCounter === 0) dragOverlay.classList.remove('visible');
+    });
+
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    document.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dragCounter = 0;
+      dragOverlay.classList.remove('visible');
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length === 0) return;
+      for (const file of files) {
+        await loadFile(file);
+      }
     });
   </script>
   <script>
