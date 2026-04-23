@@ -382,7 +382,7 @@
     body.is-mobile #info-bar { display: none !important; }
     body.is-mobile #mobile-toolbar { display: flex; }
     body.is-mobile #mobile-info { display: flex; }
-    body.is-mobile canvas { height: calc(100vh - 44px) !important; margin-top: 24px; }
+    body.is-mobile canvas { height: calc(100dvh - 68px) !important; margin-top: 24px; }
     body.is-mobile #zoom-btns { bottom: 56px; top: auto; transform: none; right: 8px; }
     body.is-mobile #ruler { bottom: 56px; right: 8px; }
     body.is-mobile #export-panel { bottom: 56px; right: 8px; }
@@ -1118,9 +1118,8 @@
       // Сбрасываем объём при изменении масштаба
       document.getElementById('volume-result').textContent='—';
       document.getElementById('info-volume').style.display='none';
+      if (isMobile) closeAllBottomPanels();
     }
-
-    function resetScale() {
       const m = getSelectedModel(); if (!m) return;
       m.obj.scale.set(1,1,1);
       const box = new THREE.Box3().setFromObject(m.obj);
@@ -1166,6 +1165,7 @@
       syncRotationInputs(m);
       repositionOnGround(m);
       updateDimensions(m.obj);
+      if (isMobile) closeAllBottomPanels();
     }
 
     function applyRotation() {
@@ -1180,6 +1180,7 @@
       );
       repositionOnGround(m);
       updateDimensions(m.obj);
+      if (isMobile) closeAllBottomPanels();
     }
 
     function resetRotation() {
