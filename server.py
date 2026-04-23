@@ -6,10 +6,8 @@ import os, tempfile, shutil
 
 app = Flask(__name__)
 
-# Максимальный размер файла — 50 МБ
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
-# Разрешённые форматы
 ALLOWED_EXTENSIONS = {'stp', 'step', 'igs', 'iges', 'stl'}
 
 def allowed_file(filename):
@@ -23,27 +21,33 @@ def too_large(e):
 def index():
     return send_from_directory('static', 'index.html')
 
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('static', 'manifest.json')
+
+@app.route('/sw.js')
+def sw():
+    return send_from_directory('static', 'sw.js')
+
+@app.route('/icons/<path:filename>')
+def icons(filename):
+    return send_from_directory('static/icons', filename)
+
 @app.route('/convert', methods=['POST'])
 def convert():
     if 'model' not in request.files:
         return {'error': 'Файл не найден'}, 400
-
     file = request.files['model']
-
     if not file.filename:
         return {'error': 'Имя файла пустое'}, 400
-
     if not allowed_file(file.filename):
         return {'error': 'Формат не поддерживается'}, 400
-
     ext = file.filename.rsplit('.', 1)[-1].lower()
-
     tmp = tempfile.mkdtemp()
     try:
         input_path = os.path.join(tmp, 'input.' + ext)
         output_path = os.path.join(tmp, 'output.glb')
         file.save(input_path)
-
         if ext in ('stp', 'step'):
             reader = STEPControl_Reader()
             reader.ReadFile(input_path)
@@ -64,13 +68,10 @@ def convert():
             stl_reader.Read(shape, input_path)
         else:
             return {'error': 'Формат не поддерживается'}, 400
-
         write_gltf_file(shape, output_path)
         return send_file(output_path, mimetype='model/gltf-binary')
-
     except Exception as e:
         return {'error': 'Ошибка конвертации: ' + str(e)}, 500
-
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
