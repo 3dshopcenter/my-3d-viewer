@@ -18,6 +18,9 @@
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     #toolbar h1 { font-size: 15px; font-weight: 500; margin-right: 4px; }
     .btn {
@@ -47,6 +50,86 @@
     }
 
     canvas { width: 100%; height: calc(100vh - 82px); display: block; }
+
+    /* ===== Адаптив для телефона ===== */
+    @media (max-width: 600px) {
+      body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+      #toolbar {
+        order: 3;
+        position: fixed;
+        bottom: 0; left: 0; right: 0; top: auto;
+        padding: 6px 8px;
+        gap: 6px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        z-index: 200;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #toolbar h1 { display: none; }
+      #status { display: none; }
+      .sep { display: none; }
+
+      .btn {
+        padding: 8px 10px;
+        font-size: 11px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      #info-bar {
+        order: 1;
+        padding: 4px 10px;
+        gap: 10px;
+        font-size: 11px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+      }
+
+      canvas {
+        order: 2;
+        height: calc(100vh - 82px);
+        flex: 1;
+      }
+
+      #zoom-btns {
+        right: 8px;
+        bottom: 70px;
+        top: auto;
+        transform: none;
+      }
+
+      #ruler {
+        bottom: 70px;
+        right: 8px;
+      }
+
+      #export-panel {
+        bottom: 70px;
+        right: 8px;
+      }
+
+      #model-list-panel {
+        top: 40px;
+        max-height: 35vh;
+      }
+
+      #measure-list-panel {
+        bottom: 70px;
+        max-height: 30vh;
+      }
+
+      #scale-panel, #move-panel, #clip-panel,
+      #rotate-panel, #volume-panel {
+        bottom: 70px;
+        left: 8px;
+        right: 60px;
+        min-width: unset;
+      }
+
+      #action-hint { top: 50px; font-size: 12px; }
+    }
 
     #loading {
       position: absolute; top: 50%; left: 50%;
@@ -477,8 +560,7 @@
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, localClippingEnabled: true });
     renderer.setSize(innerWidth, innerHeight - 82);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.setPixelRatio(window.devicePixelRatio);    renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.localClippingEnabled = true;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -546,8 +628,9 @@
 
     function updateGrid(modelSize) {
       if (grid) scene.remove(grid);
-      const fieldSize = Math.max(modelSize*3, 100);
-      const cells = Math.round(fieldSize/10);
+      // Клетка всегда 10мм, поле подстраивается под модель
+      const fieldSize = Math.max(modelSize * 3, 200);
+      const cells = Math.round(fieldSize / 10);
       grid = new THREE.GridHelper(fieldSize, cells, 0x444466, 0x333355);
       scene.add(grid);
       // Обновляем область теней под размер модели
@@ -558,7 +641,6 @@
       dirLight.shadow.camera.bottom = -s;
       dirLight.shadow.camera.updateProjectionMatrix();
     }
-
     function updateRuler(modelSize) {
       const rawValue = modelSize/2;
       const magnitude = Math.pow(10, Math.floor(Math.log10(rawValue)));
@@ -699,9 +781,16 @@
     }
     animate();
 
+    function getCanvasHeight() {
+      return window.innerWidth <= 600
+        ? window.innerHeight - document.getElementById('info-bar').offsetHeight - document.getElementById('toolbar').offsetHeight
+        : window.innerHeight - 82;
+    }
+
     window.addEventListener('resize', () => {
-      renderer.setSize(innerWidth, innerHeight-82);
-      camera.aspect = innerWidth/(innerHeight-82);
+      const h = getCanvasHeight();
+      renderer.setSize(innerWidth, h);
+      camera.aspect = innerWidth / h;
       camera.updateProjectionMatrix();
     });
 
