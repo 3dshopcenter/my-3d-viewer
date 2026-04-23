@@ -554,6 +554,7 @@
       <button class="btn" onclick="applyRotation()">Применить</button>
       <button class="btn" onclick="resetRotation()">Сбросить</button>
     </div>
+    <button class="btn" id="rotate-done-btn" onclick="closeAllBottomPanels()" style="display:none; background:#1D9E75; width:100%; margin-top:4px;">✓ Готово</button>
   </div>
 
   <!-- Панель масштаба -->
@@ -1150,12 +1151,14 @@
       rotateMode = !rotateMode;
       const btn = document.getElementById('rotate-btn');
       const panel = document.getElementById('rotate-panel');
+      const doneBtn = document.getElementById('rotate-done-btn');
       if (rotateMode) {
         if (moveMode) toggleMove();
         closeAllBottomPanels();
         panel.classList.add('visible');
         btn.classList.add('active');
         btn.textContent = 'Вращение вкл';
+        if (doneBtn) doneBtn.style.display = isMobile ? 'block' : 'none';
         const m = getSelectedModel();
         if (m) syncRotationInputs(m);
       } else {
@@ -1179,7 +1182,6 @@
       syncRotationInputs(m);
       repositionOnGround(m);
       updateDimensions(m.obj);
-      if (isMobile) closeAllBottomPanels();
     }
 
     function applyRotation() {
@@ -1194,7 +1196,6 @@
       );
       repositionOnGround(m);
       updateDimensions(m.obj);
-      if (isMobile) closeAllBottomPanels();
     }
 
     function resetRotation() {
