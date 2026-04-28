@@ -26,6 +26,17 @@ def manifest():
     return send_from_directory('static', 'manifest.json')
 
 @app.route('/sw.js')
+@app.route('/privacy')
+def privacy():
+    return '''<!DOCTYPE html><html><head><meta charset="utf-8"><title>Privacy Policy</title></head>
+<body style="font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px">
+<h1>Privacy Policy - My 3D Viewer</h1>
+<p>My 3D Viewer does not collect, store, or transmit any personal data.</p>
+<p>The application loads 3D model files selected by the user. All processing happens locally. We do not collect any information about you, your files, or your usage.</p>
+<p>No personal information is required. No accounts or registration needed.</p>
+<p>Contact: print3dmodel@yandex.ru</p>
+<p>Website: https://print3dmodel.ru</p>
+</body></html>'''
 def sw():
     return send_from_directory('static', 'sw.js')
 
